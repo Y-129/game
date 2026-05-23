@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>四渡赤水 · 指挥决策系统 | 长征信念</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0c0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', '宋体', 'Microsoft YaHei', monospace;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 40%, rgba(40,55,25,0.5), rgba(0,0,0,0.85));
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: fixed;
+            background: rgba(196, 163, 90, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: floatParticle 14s infinite linear;
+            z-index: 0;
+        }
+
+        @keyframes floatParticle {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            15% { opacity: 0.5; }
+            85% { opacity: 0.3; }
+            100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+        }
+
+        .game-container {
+            max-width: 1280px;
+            width: 100%;
+            background: rgba(20, 25, 18, 0.92);
+            backdrop-filter: blur(3px);
+            border: 3px solid #4a5a3a;
+            border-radius: 32px;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.7);
+            overflow: hidden;
+            z-index: 2;
+            position: relative;
+        }
+
+        .game-header {
+            background: #0f120ee6;
+            padding: 16px 20px;
+            text-align: center;
+            border-bottom: 2px solid #c4a35a;
+        }
+        .game-header h1 {
+            color: #c4a35a;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 6px #3a4a1f;
+        }
+        .game-header p {
+            color: #b9c49a;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .casualty-bar {
+            background: #0c0e0ae0;
+            padding: 10px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #6e8252;
+        }
+        .casualty-label {
+            color: #e6ddb3;
+            font-weight: bold;
+        }
+        .casualty-number {
+            color: #ff6a6a;
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: monospace;
+            background: #1e1b12;
+            padding: 0 20px;
+            border-radius: 60px;
+        }
+
+        .strategy-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin: 20px;
+        }
+
+        .map-area {
+            flex: 1.2;
+            min-width: 240px;
+            background: #11140e;
+            border: 2px solid #5e7048;
+            border-radius: 24px;
+            padding: 12px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .map-title {
+            color: #c4a35a;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #6e8252;
+        }
+        .map-image {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid #aab87a;
+            background: #2b3224;
+            min-height: 200px;
+            object-fit: contain;
+        }
+        .map-caption {
+            color: #b8c49a;
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .dynamic-stage {
+            flex: 2;
+            min-width: 260px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .character-avatar {
+            background: #1e2a1cd9;
+            border-radius: 60px;
+            border: 2px solid #c4a35a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 12px 20px;
+            backdrop-filter: blur(4px);
+        }
+        .avatar-icon {
+            font-size: 2.8rem;
+        }
+        .avatar-name {
+            font-size: 1.2rem;
+            color: #f5e2a4;
+            font-weight: bold;
+        }
+        .story-area {
+            background: #10150ed9;
+            border: 2px solid #4a5a3a;
+            border-radius: 28px;
+            padding: 20px 24px;
+            min-height: 280px;
+            max-height: 360px;
+            overflow-y: auto;
+        }
+        .story-text {
+            color: #f0e6c5;
+            font-size: 1.02rem;
+            line-height: 1.75;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+        }
+        .fade-in {
+            animation: textGlow 0.32s ease-out;
+        }
+        @keyframes textGlow {
+            0% { opacity: 0; transform: translateX(4px);}
+            100% { opacity: 1; transform: translateX(0);}
+        }
+
+        .choices-area {
+            padding: 8px 20px 28px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+        }
+        .choice-btn {
+            background: #2a2a2ae6;
+            border: 1px solid #8ba062;
+            color: #f2e8cf;
+            font-size: 1rem;
+            padding: 10px 26px;
+            border-radius: 60px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .choice-btn:hover {
+            background: #4c6a38;
+            transform: scale(1.02);
+        }
+
+        .music-controls {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            gap: 12px;
+            z-index: 99;
+        }
+        .music-toggle {
+            background: #1e2419dd;
+            border: 1px solid #c4a35a;
+            border-radius: 48px;
+            padding: 8px 18px;
+            font-size: 1rem;
+            cursor: pointer;
+            color: #ffe0a3;
+            backdrop-filter: blur(6px);
+            font-family: monospace;
+            transition: 0.2s;
+        }
+        .music-toggle:hover {
+            background: #4c6a38;
+        }
+        .music-status {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            background: #000000cc;
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.7rem;
+            color: #ffefb9;
+            font-family: monospace;
+            pointer-events: auto;
+            z-index: 99;
+            max-width: 320px;
+            text-align: left;
+            line-height: 1.4;
+            backdrop-filter: blur(4px);
+            border-left: 3px solid #c4a35a;
+        }
+        .test-music {
+            background: #3a4a2e;
+            color: #ffefb9;
+            border: none;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            margin-left: 8px;
+            font-family: monospace;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #6e8252;
+            padding: 12px;
+            border-top: 1px solid #3a4a2a;
+        }
+
+        @media (max-width: 780px) {
+            .strategy-layout { flex-direction: column; }
+            .game-header h1 { font-size: 1.3rem; }
+            .casualty-number { font-size: 1.5rem; }
+            .music-status { max-width: 260px; font-size: 0.6rem; bottom: 80px; left: 16px; }
+            .music-controls { bottom: 20px; right: 16px; flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="game-header">
+        <h1>⚔️ 四渡赤水 · 指挥决策系统 ⚔️</h1>
+        <p>彭雪枫 · 红十三团团长 | 军委电令 | 赤水烽烟</p>
+    </div>
+    <div class="casualty-bar">
+        <span class="casualty-label">🔴 累计伤亡 (忠魂不灭) 🔴</span>
+        <span class="casualty-number" id="casualtyDisplay">0</span>
+    </div>
+
+    <div class="strategy-layout">
+        <div class="map-area">
+            <div class="map-title">📡 赤水河畔 · 战略态势图 📡</div>
+            <!-- 直接使用您的 GitHub raw 图片链接 -->
+            <img class="map-image" id="strategyMap" src="https://raw.githubusercontent.com/Y-129/game/main/sidu_map.png" alt="四渡赤水地图" onerror="this.src='https://placehold.co/800x500/2a3820/c4a35a?text=地图加载失败'">
+            <div class="map-caption">※ 土城 · 扎西 · 娄山关 · 茅台 · 太平渡 ※</div>
+        </div>
+        <div class="dynamic-stage">
+            <div class="character-avatar">
+                <div class="avatar-icon" id="avatarIcon">🎖️</div>
+                <div class="avatar-name" id="avatarName">彭雪枫</div>
+            </div>
+            <div class="story-area" id="storyArea">
+                <div class="story-text" id="storyText">载入军情，唤醒赤水记忆...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="choices-area" id="choicesContainer"></div>
+    <footer>◆ 雄关漫道真如铁 而今迈步从头越 ◆ 信念如炬，踏破雄关</footer>
+</div>
+
+<div class="music-controls">
+    <div class="music-toggle" id="musicToggleBtn">🎵 战地音律 OFF</div>
+</div>
+<div class="music-status" id="musicStatusMsg">
+    🎵 点击下方按钮开启音乐《长征·信念》
+    <span id="testMusicBtn" class="test-music">🔊 测试播放</span>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // 完整剧情节点 (所有历史决策)
+    // --------------------------------------------------------------
+    const storyNodes = {
+        "start": {
+            text: "【遵义·1935年1月15日-17日】\n\n中共中央政治局扩大会议在此召开。\n\n会议结束了“左”倾教条主义在中央的统治，确立了毛泽东在红军和中共中央的领导地位。\n\n此刻，你——彭雪枫，红十三团团长，刚刚列席了这次会议。\n\n你亲耳听到了毛泽东的发言：\n“我们从江西出来，是为了找一条活路。”\n\n【一个月后·土城前线】\n\n新的战略正在展开，但第一场硬仗，就出了意外——",
+            casualties: 0,
+            choices: [{ text: "⚡ 进入指挥部 · 土城危急", nextId: "node1" }],
+            character: { name: "彭雪枫 · 遵义", icon: "🎖️" }
+        },
+        "node1": {
+            text: "【军委紧急电报】\n土城之敌实为川军精锐郭勋祺模范师，非先前情报之4个团。我攻坚部队已陷入胶着。\n\n【最新敌情通报】\n川军2个旅正从我侧后迂回；黔军、中央军共约40万正向此集结。你部仅3万余人，弹药粮食仅够3天。\n\n【指挥员，请立即决断】",
+            casualties: 0,
+            choices: [{ text: "A. 猛攻长江方向", nextId: "node1A" }, { text: "B. 西渡赤水避锋芒", nextId: "node1B" }, { text: "C. 化整为零分散", nextId: "node1C" }],
+            character: { name: "土城前线", icon: "⚔️" }
+        },
+        "node1A": { text: "你选择继续猛攻。但川军火力远超预期，攻坚部队伤亡惨重，侧翼也被迂回。北面长江防线更是重兵云集，无法突破。\n\n你不得不下令撤退，另寻出路。", casualties: 800, choices: [{ text: "继续撤退", nextId: "node1B" }], character: { name: "血战受挫", icon: "💔" } },
+        "node1B": { text: "你果断下令全军西渡赤水河。\n\n部队在元厚、土城渡口连夜搭起浮桥。撤退有序，但后卫部队为炸毁浮桥，与追兵激战。\n\n【当前态势】已成功渡河，暂时安全。", casualties: 200, choices: [{ text: "进入下一阶段", nextId: "branch_yangyong" }], character: { name: "西渡赤水", icon: "🌊" } },
+        "node1C": { text: "你选择化整为零，但各部队失去联系，被敌军分割包围在赤水河畔。\n\n三万人血染江水。\n\n【推演结束】", casualties: 30000, choices: [{ text: "查看结局", nextId: "ending_total_loss" }], character: { name: "全军覆没", icon: "💀" } },
+        "branch_yangyong": {
+            text: "【可选支线】\n\n主力部队正在渡河，但追兵已至。\n\n你注意到负责断后的红四师十团政委杨勇，他年仅22岁，率部在渡口死死顶住敌军进攻。\n\n你是否想了解，此刻他的命运？",
+            casualties: null, choices: [{ text: "📖 进入杨勇的故事", nextId: "yangyong_story" }, { text: "跳过，继续主线", nextId: "node2" }],
+            character: { name: "杨勇 · 断后", icon: "🛡️" }
+        },
+        "yangyong_story": { text: "【杨勇视角·断后掩护】\n\n你是杨勇，红四师十团政委。\n\n主力部队正在渡河，团长已经牺牲，现在你是指挥者。\n\n追兵越来越近，弹药将尽。战士们看着你，等你下令。", casualties: null, choices: [{ text: "死守渡口到最后一刻", nextId: "yangyong_A" }, { text: "边打边撤保存力量", nextId: "yangyong_B" }], character: { name: "杨勇抉择", icon: "🔥" } },
+        "yangyong_A": { text: "你率部死守渡口。\n\n子弹打光了，就用刺刀；刺刀断了，就用石头。\n\n主力成功渡河，但你身边的战友一个个倒下。\n\n最后时刻，你看到对岸的部队在向你挥手。\n\n你笑了笑，闭上了眼睛。\n\n【杨勇支线·结局：死守的代价】", casualties: null, choices: [{ text: "回到主线", nextId: "node2" }], character: { name: "杨勇牺牲", icon: "🕯️" } },
+        "yangyong_B": { text: "你下令边打边撤。\n\n部队保留了骨干力量，但被上级追问“为什么不坚守到最后一刻”。\n\n你沉默片刻，说：“活着，才能继续革命。”\n\n【杨勇支线·结局：活下来的选择】", casualties: null, choices: [{ text: "回到主线", nextId: "node2" }], character: { name: "杨勇新生", icon: "🌱" } },
+        "node2": {
+            text: "【军委二局情报】\n截获密电：滇军已在扎西地区布好口袋，等你入瓮。\n\n但你的部队急需休整，扎西是最近的落脚点。\n\n【指挥员，请决断】",
+            casualties: 200, choices: [{ text: "A. 去扎西休整", nextId: "node2A" }, { text: "B. 东返二渡赤水", nextId: "node2B" }, { text: "C. 原地观望", nextId: "node2C" }],
+            character: { name: "扎西抉择", icon: "🗺️" }
+        },
+        "node2A": { text: "你按原计划前往扎西，正中滇军埋伏。\n\n部队伤亡惨重，被迫突围。\n\n【推演结束】", casualties: 5000, choices: [{ text: "查看结局", nextId: "ending_bad_decision" }], character: { name: "败局", icon: "⚠️" } },
+        "node2B": { text: "你决定杀个回马枪。\n\n部队急行军，折返赤水河畔。\n\n【情报确认】黔北空虚，敌军主力已被你甩在身后。\n\n东返二渡，剑指遵义！", casualties: 300, choices: [{ text: "进入下一阶段", nextId: "node3" }], character: { name: "回马枪", icon: "🐎" } },
+        "node2C": { text: "你选择原地观望。\n\n但敌军正在重新合围，你的犹豫给了他们时间。\n\n当你终于下定决心时，退路已被切断。\n\n【推演结束】", casualties: 8000, choices: [{ text: "查看结局", nextId: "ending_bad_decision" }], character: { name: "错失良机", icon: "⏳" } },
+        "node3": {
+            text: "【扎西·军委扩大会议】\n\n部队进入扎西地区。连番征战，减员严重，机关臃肿。\n\n军委下达缩编命令：30个团缩编为16个团，干部层层下放。\n\n“凡是两人抬不动的东西，都甩掉。”\n\n这意味着你要让一些团长去当营长，让一些营长去当连长。\n\n有人会骂你，有人会不服。\n\n你怎么办？",
+            casualties: 300, choices: [{ text: "A. 坚决精简", nextId: "node3A" }, { text: "B. 部分保留原职", nextId: "node3B" }, { text: "C. 维持原状", nextId: "node3C" }],
+            character: { name: "扎西整编", icon: "📜" }
+        },
+        "node3A": { text: "你坚决执行整编命令。\n\n精简后的部队轻装上阵，机动性大增。\n\n虽然有人不满，但你心里清楚——活下去，比什么都重要。", casualties: null, choices: [{ text: "进入下一阶段", nextId: "branch_hezizhen" }], character: { name: "精锐之师", icon: "⚡" } },
+        "node3B": { text: "你保留了一部分干部的原职。\n\n大家情绪稳定，但部队依然有些臃肿。后续行军中，速度略受影响。", casualties: null, choices: [{ text: "进入下一阶段", nextId: "branch_hezizhen" }], character: { name: "中庸之道", icon: "⚖️" } },
+        "node3C": { text: "你选择维持原状。\n\n但臃肿的机关拖慢了行军速度。\n\n敌军侦察机发现了你的行踪，追兵加速赶来。\n\n【推演结束】", casualties: 12000, choices: [{ text: "查看结局", nextId: "ending_bad_decision" }], character: { name: "迟滞", icon: "🐢" } },
+        "branch_hezizhen": {
+            text: "【可选支线】\n\n扎西的寒风中，队伍匆匆行军。\n\n你注意到队伍后方，一位女战士咬着牙，艰难地跟上队伍。\n\n她是贺子珍，此时怀着身孕，却从未要求特殊照顾。\n\n你是否想了解，此刻她的命运？",
+            casualties: null, choices: [{ text: "🌸 进入贺子珍的故事", nextId: "hezizhen_story" }, { text: "跳过，继续主线", nextId: "node4" }],
+            character: { name: "贺子珍", icon: "🤰" }
+        },
+        "hezizhen_story": { text: "【贺子珍视角·扎西行军】\n\n你是贺子珍。\n\n部队在扎西的寒风中急行军。你怀着身孕，身体越来越重。\n\n脚上磨出了血泡，每一步都钻心地疼。\n\n战友问你是否需要帮助，你摇摇头。\n\n你知道，队伍不会因为你停下。", casualties: null, choices: [{ text: "隐瞒不适咬牙跟上", nextId: "hezizhen_A" }, { text: "接受战友帮助", nextId: "hezizhen_B" }], character: { name: "贺子珍", icon: "❄️" } },
+        "hezizhen_A": { text: "你咬牙坚持，险些晕倒在行军路上。\n\n战友们发现时，你的嘴唇已经咬出了血。\n\n他们用担架抬着你走了最后一段路。\n\n你活下来了，孩子也保住了。\n\n【贺子珍支线·结局：一个人的长征】", casualties: null, choices: [{ text: "回到主线", nextId: "node4" }], character: { name: "坚韧", icon: "🏔️" } },
+        "hezizhen_B": { text: "你接受了战友的帮助。\n\n他们轮流搀扶你，分出自己的干粮。\n\n你感到温暖，也感到愧疚。\n\n但你知道，在这支队伍里，没有人会被抛下。\n\n【贺子珍支线·结局：并肩的力量】", casualties: null, choices: [{ text: "回到主线", nextId: "node4" }], character: { name: "团结", icon: "🤝" } },
+        "node4": {
+            text: "【情报确认】\n\n黔北兵力空虚，遵义就在眼前。\n\n你下令部队从太平渡、二郎滩二渡赤水，回师黔北。\n\n部队士气高涨，因为他们知道——要回家了。\n\n前方就是娄山关，黔北门户。\n\n拿下它，遵义就在脚下。",
+            casualties: 400, choices: [{ text: "攻打娄山关", nextId: "node5" }],
+            character: { name: "二渡赤水", icon: "⛰️" }
+        },
+        "node5": {
+            text: "【娄山关·1935年2月25日】\n\n你率红十三团担任正面主攻。\n\n娄山关地势险要，一夫当关。\n\n侦察兵报告：侧面点金山有一条小路可以迂回。\n\n【指挥员，请决断】",
+            casualties: 500, choices: [{ text: "A. 正面强攻", nextId: "node5A" }, { text: "B. 分兵奇袭点金山", nextId: "node5B" }, { text: "C. 等待增援", nextId: "node5C" }],
+            character: { name: "娄山关", icon: "🏔️" }
+        },
+        "node5A": { text: "你下令正面强攻。炮火轰鸣，战士们前赴后继。娄山关终于被攻克，但代价惨重。\n\n你站在关口，念出了那首词：“雄关漫道真如铁，而今迈步从头越。”", casualties: 1200, choices: [{ text: "进入下一阶段", nextId: "branch_zengxisheng" }], character: { name: "惨胜", icon: "💥" } },
+        "node5B": { text: "你派出一支突击队，走小路奇袭点金山。敌军措手不及，侧翼被突破。你率主力趁势猛攻，娄山关大捷！伤亡远小于预期。\n\n“雄关漫道真如铁，而今迈步从头越。”", casualties: 800, choices: [{ text: "进入下一阶段", nextId: "branch_zengxisheng" }], character: { name: "奇袭制胜", icon: "🎯" } },
+        "node5C": { text: "你选择等待增援。但敌军也在调兵遣将。当你终于决定进攻时，敌军增援已经赶到。机会稍纵即逝。\n\n【推演结束】", casualties: 3000, choices: [{ text: "查看结局", nextId: "ending_bad_decision" }], character: { name: "贻误战机", icon: "⏰" } },
+        "branch_zengxisheng": {
+            text: "【可选支线】\n\n娄山关的胜利，离不开军委二局。负责人曾希圣，已经三天三夜没有合眼。\n\n你是否想了解，此刻他的命运？",
+            casualties: null, choices: [{ text: "📡 进入曾希圣的故事", nextId: "zengxisheng_story" }, { text: "跳过，继续主线", nextId: "node6" }],
+            character: { name: "曾希圣", icon: "📻" }
+        },
+        "zengxisheng_story": { text: "【曾希圣视角·情报博弈】\n\n你是曾希圣，军委二局局长。\n\n你手中有一份刚破译的敌军电报——蒋介石正在调集大军，企图在遵义地区重新合围。\n\n但你的破译只有七成把握。\n\n你怎么办？", casualties: null, choices: [{ text: "标注“最优先”立即上报", nextId: "zengxisheng_A" }, { text: "按流程逐级上报核实", nextId: "zengxisheng_B" }], character: { name: "曾希圣", icon: "📡" } },
+        "zengxisheng_A": { text: "你将情报标注为“最优先”，直接上报。毛泽东看到后，果断下令追击遵义。事实证明你的判断完全正确。\n\n【曾希圣支线·结局：无声的功勋】", casualties: null, choices: [{ text: "回到主线", nextId: "node6" }], character: { name: "功勋", icon: "🏅" } },
+        "zengxisheng_B": { text: "你选择按流程逐级上报。情报传递慢了半拍，敌军已经抢先一步调动。红军追击遇到阻力。\n\n【曾希圣支线·结局：流程的代价】", casualties: null, choices: [{ text: "回到主线", nextId: "node6" }], character: { name: "迟报", icon: "⌛" } },
+        "node6": {
+            text: "娄山关大捷后，敌军溃退。你面临选择：是否乘胜追击，直取遵义？部队极度疲惫。\n\n【指挥员，请决断】",
+            casualties: null, choices: [{ text: "A. 猛追到底", nextId: "node6A" }, { text: "B. 休整一天", nextId: "node6B" }, { text: "C. 分兵追击", nextId: "node6C" }],
+            character: { name: "追击时刻", icon: "🏃" }
+        },
+        "node6A": { text: "你下令猛追到底。疲惫的战士们咬着牙冲向遵义城。敌军还没反应过来，遵义已被攻克。歼敌2个师又8个团，俘敌3000余人。全城百姓夹道欢迎。", casualties: 200, choices: [{ text: "进入下一阶段", nextId: "node7" }], character: { name: "大捷", icon: "🎉" } },
+        "node6B": { text: "你决定休整一天。但就是这一天，敌军重新布防了遵义城防。后续攻城付出了额外代价。最终还是拿下遵义，战机稍纵即逝。", casualties: 600, choices: [{ text: "进入下一阶段", nextId: "node7" }], character: { name: "代价", icon: "🕰️" } },
+        "node6C": { text: "你选择分兵追击。兵力分散后，其中一路中了敌军埋伏，被各个击破。\n\n【推演结束】", casualties: 4000, choices: [{ text: "查看结局", nextId: "ending_bad_decision" }], character: { name: "败局", icon: "❌" } },
+        "node7": {
+            text: "【1935年3月16日·茅台】\n\n遵义大捷后，敌军重新集结。军委决定：在茅台三渡赤水，大张旗鼓向川南佯动，制造北渡长江假象。\n\n目标是调出滇军。",
+            casualties: null, choices: [{ text: "A. 大张旗鼓渡河", nextId: "node7A" }, { text: "B. 小股佯动", nextId: "node7B" }, { text: "C. 真渡长江", nextId: "node7C" }],
+            character: { name: "三渡赤水", icon: "🚩" }
+        },
+        "node7A": { text: "你下令全军大张旗鼓白天渡河。蒋介石侦察机看得清清楚楚，他立即下令滇军全部出动向川南追击！鱼已上钩。", casualties: 50, choices: [{ text: "进入下一阶段", nextId: "node8" }], character: { name: "诱敌成功", icon: "🎣" } },
+        "node7B": { text: "你只派了小股部队佯动。动作太小，敌军识破意图。蒋介石没有上钩，滇军未动。后续突围受阻。\n\n【推演结束】", casualties: 1000, choices: [{ text: "查看结局", nextId: "ending_bad_decision" }], character: { name: "计败", icon: "🌫️" } },
+        "node7C": { text: "你决定一鼓作气真渡长江。但长江防线重兵云集，川军严阵以待。一头撞在铁板上，部队伤亡惨重。\n\n【推演结束】", casualties: 15000, choices: [{ text: "查看结局", nextId: "ending_bad_decision" }], character: { name: "强渡失败", icon: "🌊" } },
+        "node8": {
+            text: "【1935年3月21日】\n\n蒋介石追兵被你调往川南。红军主力隐蔽折返，从太平渡、二郎滩四渡赤水。最后关卡：南渡乌江，跳出包围圈。",
+            casualties: 100, choices: [{ text: "A. 集中兵力单点突破", nextId: "node8A" }, { text: "B. 分散突围", nextId: "node8B" }, { text: "C. 就地坚守", nextId: "node8C" }],
+            character: { name: "最终决断", icon: "🔥" }
+        },
+        "node8A": { text: "你下令集中兵力，单点突破。红军如尖刀撕开防线。南渡乌江成功！佯攻贵阳调出滇军，40万大军包围圈被甩在身后。红军主力，如游龙入海。", casualties: 300, choices: [{ text: "查看最终结局", nextId: "branch_hongxiaogui" }], character: { name: "神之一手", icon: "🐉" } },
+        "node8B": { text: "你选择分散突围。部分部队成功突围，但有些被打散。主力保住了，代价比预期更大。", casualties: 2000, choices: [{ text: "查看最终结局", nextId: "branch_hongxiaogui" }], character: { name: "代价突围", icon: "🗡️" } },
+        "node8C": { text: "你选择就地坚守，等待时机。但敌军重新完成合围。你被困赤水河畔。\n\n【推演结束】", casualties: 25000, choices: [{ text: "查看结局", nextId: "ending_bad_decision" }], character: { name: "困兽", icon: "🪤" } },
+        "branch_hongxiaogui": {
+            text: "【可选支线】\n\n四渡赤水成功了。队伍中有一个年轻面孔，陈小虎，入伍三个月，17岁。你是否想了解此刻他在想什么？",
+            casualties: null, choices: [{ text: "🌟 进入红小鬼的故事", nextId: "hongxiaogui_story" }, { text: "跳过，查看结局", nextId: "final_ending" }],
+            character: { name: "红小鬼", icon: "🧒" }
+        },
+        "hongxiaogui_story": { text: "【红小鬼视角】你是陈小虎，17岁。三个月前还在放牛。现在扛着枪走过了四渡赤水。班长问你能不能再走，你脚底全是血泡。但你说——", casualties: null, choices: [{ text: "“能走，死也要前进”", nextId: "hongxiaogui_A" }, { text: "“班长，我想歇一歇”", nextId: "hongxiaogui_B" }], character: { name: "小虎", icon: "🌟" } },
+        "hongxiaogui_A": { text: "班长拍了拍你的肩膀。“好小子，跟上。”你跟上了。赤水河在你身后，你的人生才刚刚开始。\n\n【红小鬼支线·结局：前进的路】", casualties: null, choices: [{ text: "查看最终结局", nextId: "final_ending" }], character: { name: "少年战士", icon: "🚀" } },
+        "hongxiaogui_B": { text: "班长沉默了一下，把自己的草鞋脱给你。“穿上，再走一段。走不动了我背你。”你穿上草鞋，继续向前。\n\n【红小鬼支线·结局：不会落下的队伍】", casualties: null, choices: [{ text: "查看最终结局", nextId: "final_ending" }], character: { name: "温暖", icon: "❤️" } },
+        "final_ending": { text: "", casualties: null, choices: [{ text: "重新开始推演", nextId: "start" }], character: { name: "征程永恒", icon: "🏁" } },
+        "ending_total_loss": { text: "你的决策失误，导致三万人血染赤水河。河水寂静，历史仿佛在此终结。但请沿着伟人的思路，重新寻找生路。", casualties: null, choices: [{ text: "重新开始推演", nextId: "start" }], character: { name: "悲歌", icon: "🕊️" } },
+        "ending_bad_decision": { text: "你的决策出现偏差。在真实历史中，红军每一步都走在刀尖上。请重新开始，体会他们的智慧与勇气。", casualties: null, choices: [{ text: "重新开始推演", nextId: "start" }], character: { name: "复盘", icon: "📖" } }
+    };
+
+    // 全局变量
+    let totalCasualties = 0;
+    let currentNodeId = "start";
+    let flags = { yangyong: false, hezizhen: false, zeng: false, hongxiaogui: false };
+
+    // 音乐系统：使用您的永久直链
+    const MUSIC_URL = "https://raw.githubusercontent.com/Y-129/game/main/changzheng_xinnian.mp3";
+    let bgAudio = null;
+    let musicEnabled = false;
+
+    function initAudio() {
+        if (bgAudio) return;
+        bgAudio = new Audio(MUSIC_URL);
+        bgAudio.loop = true;
+        bgAudio.volume = 0.3;
+        bgAudio.preload = "auto";
+        bgAudio.addEventListener("canplaythrough", () => {
+            updateMusicStatus("✅ 音乐加载完成，点击下方按钮播放", false);
+        });
+        bgAudio.addEventListener("error", () => {
+            updateMusicStatus("❌ 音乐加载失败，请检查网络或链接是否有效", true);
+        });
+    }
+
+    function forcePlayMusic() {
+        if (!bgAudio) initAudio();
+        bgAudio.play().then(() => {
+            musicEnabled = true;
+            document.getElementById("musicToggleBtn").innerHTML = "🎵 战地音律 ON";
+            updateMusicStatus("🎵 《长征·信念》正在播放 | 右下角可关闭", false);
+        }).catch(err => {
+            console.warn("播放失败", err);
+            updateMusicStatus("⚠️ 播放失败，请点击页面任意选项后再试（浏览器限制）", true);
+        });
+    }
+
+    function toggleMusic() {
+        if (!bgAudio) initAudio();
+        if (!musicEnabled) {
+            bgAudio.play().then(() => {
+                musicEnabled = true;
+                document.getElementById("musicToggleBtn").innerHTML = "🎵 战地音律 ON";
+                updateMusicStatus("🎵 信念之歌正在播放", false);
+            }).catch(err => {
+                updateMusicStatus("❌ 播放失败，请点击测试按钮后重试", true);
+            });
+        } else {
+            bgAudio.pause();
+            musicEnabled = false;
+            document.getElementById("musicToggleBtn").innerHTML = "🔇 战地音律 OFF";
+            updateMusicStatus("🔇 音乐已暂停", false);
+        }
+    }
+
+    function updateMusicStatus(text, isError) {
+        const statusDiv = document.getElementById("musicStatusMsg");
+        if (statusDiv) {
+            statusDiv.innerHTML = text + ' <span id="testMusicBtn" class="test-music">🔊 测试播放</span>';
+            if (isError) statusDiv.style.color = "#ffbb99";
+            else statusDiv.style.color = "#ffefb9";
+        }
+        const testBtn = document.getElementById("testMusicBtn");
+        if (testBtn) testBtn.onclick = () => forcePlayMusic();
+    }
+
+    // 游戏核心逻辑
+    function updateCasualtyUI() { document.getElementById("casualtyDisplay").innerText = totalCasualties; }
+    function addCasualties(value) { if (value && typeof value === "number" && value !== 0) { totalCasualties += value; updateCasualtyUI(); } }
+    function updateCharacter(nodeId) {
+        const node = storyNodes[nodeId];
+        if (node && node.character) {
+            document.getElementById("avatarIcon").innerHTML = node.character.icon;
+            document.getElementById("avatarName").innerHTML = node.character.name;
+        }
+    }
+    function renderNode(nodeId) {
+        const node = storyNodes[nodeId];
+        if (!node) return;
+        if (node.casualties !== undefined && node.casualties !== null && typeof node.casualties === "number") addCasualties(node.casualties);
+        if (nodeId === "final_ending") {
+            let baseMsg = "";
+            if (totalCasualties < 2000) baseMsg = `你仅以${totalCasualties}人的代价，完成了奇迹般的战略转移。你是指挥台上的天才。但请记住，真实的历史没有如果。那位真正的指挥者，背负着数万人的生命，每一步抉择，都比你此刻所见，沉重万钧。`;
+            else if (totalCasualties >= 2000 && totalCasualties <= 5000) baseMsg = `你成功了，但付出了${totalCasualties}名战友的沉重代价。你体会到了吗？真正的“用兵如神”，不是戏法，而是用巨大的牺牲和超凡的胆略，在死局里为革命挣来一线生机。`;
+            else baseMsg = `你成功了，但代价极其惨重。这场胜利，是用鲜血换来的。请记住这个数字——${totalCasualties}。在真实的历史中，红军用更小的代价完成了这个奇迹。他们的每一步，都比你的选择更精准。`;
+            let epilogue = "";
+            if (flags.yangyong) epilogue += "\n\n【支线回响·杨勇】断后战士的血性与抉择，赤水河铭记。";
+            if (flags.hezizhen) epilogue += "\n\n【支线回响·贺子珍】怀孕女战士的坚韧，长征路上的母亲。";
+            if (flags.zeng) epilogue += "\n\n【支线回响·曾希圣】情报战线的无声功勋，一封电文定生死。";
+            if (flags.hongxiaogui) epilogue += "\n\n【支线回响·红小鬼】少年战士的心声：这支队伍，不会抛下任何一人。";
+            storyNodes.final_ending.text = baseMsg + epilogue;
+        }
+        const storyDiv = document.getElementById("storyText");
+        const storyContainer = document.getElementById("storyArea");
+        storyContainer.classList.remove("fade-in");
+        void storyContainer.offsetWidth;
+        storyDiv.innerText = storyNodes[nodeId].text;
+        storyContainer.classList.add("fade-in");
+        updateCharacter(nodeId);
+
+        const choicesDiv = document.getElementById("choicesContainer");
+        choicesDiv.innerHTML = "";
+        if (node.choices && node.choices.length) {
+            node.choices.forEach(choice => {
+                const btn = document.createElement("button");
+                btn.className = "choice-btn";
+                btn.innerText = choice.text;
+                btn.addEventListener("click", () => {
+                    // 首次点击选项尝试播放音乐
+                    if (!musicEnabled && !bgAudio) forcePlayMusic();
+                    if (choice.nextId === "yangyong_story") flags.yangyong = true;
+                    if (choice.nextId === "hezizhen_story") flags.hezizhen = true;
+                    if (choice.nextId === "zengxisheng_story") flags.zeng = true;
+                    if (choice.nextId === "hongxiaogui_story") flags.hongxiaogui = true;
+                    currentNodeId = choice.nextId;
+                    renderNode(currentNodeId);
+                });
+                choicesDiv.appendChild(btn);
+            });
+        } else {
+            const resetBtn = document.createElement("button");
+            resetBtn.className = "choice-btn";
+            resetBtn.innerText = "重新开始";
+            resetBtn.addEventListener("click", () => {
+                if (!musicEnabled && !bgAudio) forcePlayMusic();
+                resetGame();
+            });
+            choicesDiv.appendChild(resetBtn);
+        }
+    }
+    function resetGame() {
+        totalCasualties = 0;
+        currentNodeId = "start";
+        flags = { yangyong: false, hezizhen: false, zeng: false, hongxiaogui: false };
+        updateCasualtyUI();
+        renderNode("start");
+    }
+
+    function createParticles() {
+        for(let i=0;i<45;i++) {
+            let p = document.createElement("div");
+            p.classList.add("particle");
+            let s = Math.random() * 5 + 2;
+            p.style.width = s+"px";
+            p.style.height = s+"px";
+            p.style.left = Math.random() * 100 + "%";
+            p.style.animationDuration = 9 + Math.random() * 16 + "s";
+            p.style.animationDelay = Math.random() * 20 + "s";
+            p.style.opacity = Math.random() * 0.5;
+            document.body.appendChild(p);
+        }
+    }
+
+    function startGame() {
+        initAudio();
+        const toggleBtn = document.getElementById("musicToggleBtn");
+        if (toggleBtn) toggleBtn.addEventListener("click", toggleMusic);
+        updateCasualtyUI();
+        renderNode("start");
+        createParticles();
+        updateMusicStatus("🎵 点击「测试播放」或下方按钮播放《长征·信念》", false);
+    }
+    startGame();
+</script>
+</body>
+</html>
