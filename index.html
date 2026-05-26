@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>四渡赤水 | 1935 · 第一人称指挥体验</title>
+
+    <!-- 字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Noto Sans SC', sans-serif; }
+        body { background: #0a0a0a; color: #e8e8e8; }
+
+        /* 加载界面 */
+        .loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0a0a0a; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999;
+            transition: opacity 1s ease;
+        }
+        .loading-screen.hidden { opacity: 0; pointer-events: none; }
+        .loading-title {
+            font-family: 'Noto Serif SC', serif; font-size: 3em; font-weight: 700;
+            color: #c9a227; letter-spacing: 20px; margin-bottom: 20px;
+            animation: fadeInUp 1.5s ease;
+        }
+        .loading-subtitle {
+            font-size: 1.2em; color: #666; letter-spacing: 5px; margin-bottom: 60px;
+            animation: fadeInUp 1.5s ease 0.3s both;
+        }
+        .loading-progress {
+            width: 300px; height: 3px; background: #333; border-radius: 2px;
+            overflow: hidden; animation: fadeInUp 1s ease 0.6s both;
+        }
+        .loading-bar {
+            width: 0%; height: 100%;
+            background: linear-gradient(90deg, #c9a227, #e8c547);
+            transition: width 0.3s ease;
+        }
+        .loading-text {
+            margin-top: 20px; color: #666; font-size: 0.9em;
+            animation: fadeInUp 1s ease 0.8s both;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 语言选择 */
+        .lang-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; z-index: 9998; opacity: 0;
+            pointer-events: none; transition: opacity 0.8s ease;
+        }
+        .lang-screen.active { opacity: 1; pointer-events: auto; }
+        .lang-title {
+            font-family: 'Noto Serif SC', serif; font-size: 2.5em;
+            color: #c9a227; margin-bottom: 60px; letter-spacing: 8px;
+        }
+        .lang-options { display: flex; gap: 40px; }
+        .lang-option {
+            width: 200px; height: 250px;
+            background: linear-gradient(135deg, #1e2a3a 0%, #151e2a 100%);
+            border: 2px solid #3a4a5a; border-radius: 15px;
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; cursor: pointer; transition: all 0.4s ease;
+        }
+        .lang-option:hover {
+            transform: translateY(-10px); border-color: #c9a227;
+            box-shadow: 0 20px 60px rgba(201, 162, 39, 0.3);
+        }
+        .lang-flag { font-size: 4em; margin-bottom: 20px; }
+        .lang-name { font-size: 1.5em; font-weight: 600; color: #fff; margin-bottom: 8px; }
+        .lang-name-en { font-size: 0.9em; color: #888; }
+
+        /* 开场介绍 */
+        .intro-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9997;
+            opacity: 0; pointer-events: none; transition: opacity 1s ease;
+        }
+        .intro-screen.active { opacity: 1; pointer-events: auto; }
+        .intro-text {
+            max-width: 800px; text-align: center;
+            font-family: 'Noto Serif SC', serif; font-size: 1.8em;
+            line-height: 2.2; color: #aaa; opacity: 0;
+            transform: translateY(50px); transition: all 2s ease;
+        }
+        .intro-text.visible { opacity: 1; transform: translateY(0); }
+        .intro-skip {
+            position: fixed; bottom: 40px; right: 40px; color: #666;
+            font-size: 0.9em; cursor: pointer; transition: color 0.3s;
+        }
+        .intro-skip:hover { color: #c9a227; }
+
+        /* 主游戏界面 */
+        .game-container {
+            width: 100%; height: 100%; display: none; position: relative;
+        }
+        .game-container.active { display: block; }
+        .top-bar {
+            position: fixed; top: 0; left: 0; right: 0; height: 70px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 40px; z-index: 100;
+        }
+        .chapter-info { display: flex; flex-direction: column; }
+        .chapter-number {
+            font-family: 'Noto Serif SC', serif; font-size: 0.85em;
+            color: #c9a227; letter-spacing: 2px;
+        }
+        .chapter-title { font-size: 1.1em; font-weight: 500; color: #fff; margin-top: 3px; }
+        .stats-display { display: flex; gap: 40px; }
+        .stat-item { display: flex; flex-direction: column; align-items: flex-end; }
+        .stat-label { font-size: 0.75em; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-size: 1.3em; font-weight: 600; }
+        .stat-troops { color: #ff6b6b; }
+        .stat-supply { color: #4ecdc4; }
+        .stat-morale { color: #ffe66d; }
+
+        /* 场景区域 */
+        .scene-area {
+            width: 100%; height: 100%; position: relative;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            padding-bottom: 150px;
+        }
+        .dialogue-area {
+            position: relative; z-index: 10; max-width: 1000px;
+            margin: 0 auto; padding: 0 40px;
+        }
+        .speaker-name {
+            font-family: 'Noto Serif SC', serif; font-size: 1.1em;
+            color: #c9a227; margin-bottom: 15px; letter-spacing: 3px;
+            opacity: 0; transform: translateX(-20px); transition: all 0.5s ease;
+        }
+        .speaker-name.visible { opacity: 1; transform: translateX(0); }
+        .dialogue-box {
+            background: linear-gradient(135deg, rgba(30,42,58,0.95) 0%, rgba(20,28,40,0.95) 100%);
+            border: 1px solid rgba(201,162,39,0.3); border-radius: 12px;
+            padding: 35px 40px; position: relative; opacity: 0;
+            transform: translateY(30px); transition: all 0.6s ease 0.2s;
+        }
+        .dialogue-box.visible { opacity: 1; transform: translateY(0); }
+        .dialogue-box::before {
+            content: ''; position: absolute; top: -1px; left: 30px;
+            width: 60px; height: 3px;
+            background: linear-gradient(90deg, #c9a227, transparent);
+            border-radius: 2px;
+        }
+        .dialogue-text {
+            font-family: 'Noto Serif SC', serif; font-size: 1.35em;
+            line-height: 2; color: #e0e0e0; min-height: 120px;
+        }
+        .cursor {
+            display: inline-block; width: 3px; height: 1.2em;
+            background: #c9a227; margin-left: 5px;
+            animation: blink 0.8s infinite; vertical-align: text-bottom;
+        }
+        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+        .continue-hint {
+            position: absolute; bottom: 15px; right: 30px;
+            font-size: 0.85em; color: #666; animation: pulse 2s infinite;
+            cursor: pointer; display: none;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+        /* 配音控制 */
+        .voice-control {
+            position: absolute; bottom: 15px; left: 30px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .voice-btn {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: rgba(201,162,39,0.2);
+            border: 1px solid rgba(201,162,39,0.4);
+            color: #c9a227; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s; font-size: 14px;
+        }
+        .voice-btn:hover { background: rgba(201,162,39,0.4); }
+        .voice-btn.playing {
+            background: #c9a227; color: #000;
+            animation: playingPulse 1s infinite;
+        }
+        @keyframes playingPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(201,162,39,0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(201,162,39,0); }
+        }
+
+        /* 选项 */
+        .choices-area {
+            position: relative; z-index: 10; max-width: 900px;
+            margin: 30px auto 0; padding: 0 40px;
+            display: flex; flex-direction: column; gap: 15px;
+        }
+        .choice-btn {
+            background: linear-gradient(135deg, rgba(45,60,80,0.8) 0%, rgba(30,45,60,0.8) 100%);
+            border: 1px solid rgba(100,120,150,0.3); border-radius: 10px;
+            padding: 20px 30px; color: #ccc; font-size: 1.05em;
+            line-height: 1.6; cursor: pointer; text-align: left;
+            transition: all 0.4s ease; opacity: 0; transform: translateX(-30px);
+            position: relative; overflow: hidden;
+        }
+        .choice-btn.visible { opacity: 1; transform: translateX(0); }
+        .choice-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(201,162,39,0.1), transparent);
+            transition: left 0.5s;
+        }
+        .choice-btn:hover {
+            transform: translateX(10px); border-color: rgba(201,162,39,0.6);
+            background: linear-gradient(135deg, rgba(55,75,100,0.9) 0%, rgba(40,55,75,0.9) 100%);
+            color: #fff;
+        }
+        .choice-btn:hover::before { left: 100%; }
+        .choice-letter { color: #c9a227; font-weight: 700; margin-right: 12px; }
+
+        /* 小地图 */
+        .mini-map {
+            position: fixed; top: 90px; right: 30px; width: 220px; height: 180px;
+            background: linear-gradient(135deg, rgba(20,30,20,0.9) 0%, rgba(10,20,10,0.9) 100%);
+            border: 1px solid rgba(100,150,100,0.3); border-radius: 12px;
+            z-index: 50; overflow: hidden;
+        }
+        .map-title-small {
+            text-align: center; padding: 10px; font-size: 0.85em;
+            color: #8bc34a; border-bottom: 1px solid rgba(100,150,100,0.2);
+            letter-spacing: 2px;
+        }
+        .map-content {
+            position: relative; width: 100%; height: calc(100% - 40px);
+        }
+        .map-river {
+            position: absolute; width: 100%; height: 4px;
+            background: linear-gradient(90deg, #1e88e5, #42a5f5, #1e88e5);
+            top: 55%; opacity: 0.6;
+        }
+        .map-point {
+            position: absolute; width: 10px; height: 10px; border-radius: 50%;
+            background: #555; transform: translate(-50%, -50%);
+            transition: all 0.5s ease;
+        }
+        .map-point.visited { background: #4caf50; }
+        .map-point.current {
+            background: #ff5722; box-shadow: 0 0 10px rgba(255,87,34,0.8);
+            animation: mapPulse 2s infinite;
+        }
+        @keyframes mapPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.4); }
+        }
+        .map-point-label {
+            position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+            font-size: 9px; color: #888; white-space: nowrap; margin-top: 3px;
+        }
+        .red-army-dot {
+            position: absolute; width: 16px; height: 16px;
+            background: radial-gradient(circle, #ff0000, #b71c1c);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            transform: translate(-50%, -50%); z-index: 10;
+            transition: all 1s ease;
+            filter: drop-shadow(0 0 6px rgba(255,0,0,0.8));
+        }
+
+        /* 背景音乐 */
+        .bgm-control { position: fixed; bottom: 30px; right: 30px; z-index: 100; }
+        .bgm-btn {
+            width: 50px; height: 50px; border-radius: 50%;
+            background: linear-gradient(135deg, #2a2a3a 0%, #1a1a2a 100%);
+            border: 2px solid #444; color: #888; font-size: 20px;
+            cursor: pointer; transition: all 0.3s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .bgm-btn:hover { border-color: #c9a227; color: #c9a227; }
+        .bgm-btn.playing {
+            border-color: #8bc34a; color: #8bc34a;
+            animation: bgmRotate 3s linear infinite;
+        }
+        @keyframes bgmRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* 语言切换 */
+        .lang-switch-btn {
+            position: fixed; bottom: 30px; left: 30px; z-index: 100;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #2a2a3a 0%, #1a1a2a 100%);
+            border: 1px solid #444; border-radius: 25px;
+            color: #888; font-size: 0.85em; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .lang-switch-btn:hover { border-color: #c9a227; color: #c9a227; }
+
+        /* 结局画面 */
+        .ending-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 100%);
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; z-index: 900; opacity: 0;
+            pointer-events: none; transition: opacity 1.5s ease;
+        }
+        .ending-screen.active { opacity: 1; pointer-events: auto; }
+        .ending-grade {
+            font-family: 'Noto Serif SC', serif; font-size: 4em;
+            font-weight: 700; margin-bottom: 30px; opacity: 0;
+            transform: scale(0.8); transition: all 1s ease 0.5s;
+        }
+        .ending-grade.visible { opacity: 1; transform: scale(1); }
+        .ending-grade.excellent { color: #4caf50; text-shadow: 0 0 40px rgba(76,175,80,0.5); }
+        .ending-grade.good { color: #8bc34a; text-shadow: 0 0 30px rgba(139,195,74,0.4); }
+        .ending-grade.normal { color: #ffc107; text-shadow: 0 0 30px rgba(255,193,7,0.4); }
+        .ending-grade.poor { color: #ff9800; text-shadow: 0 0 30px rgba(255,152,0,0.4); }
+        .ending-grade.bad { color: #f44336; text-shadow: 0 0 30px rgba(244,67,54,0.4); }
+        .ending-stats {
+            display: flex; gap: 60px; margin-bottom: 40px; opacity: 0;
+            transform: translateY(30px); transition: all 0.8s ease 1s;
+        }
+        .ending-stats.visible { opacity: 1; transform: translateY(0); }
+        .ending-stat { text-align: center; }
+        .ending-stat-label {
+            font-size: 0.85em; color: #666; text-transform: uppercase;
+            letter-spacing: 2px; margin-bottom: 8px;
+        }
+        .ending-stat-value { font-size: 2em; font-weight: 600; }
+        .ending-desc {
+            max-width: 700px; text-align: center;
+            font-family: 'Noto Serif SC', serif; font-size: 1.3em;
+            line-height: 2; color: #aaa; opacity: 0;
+            transform: translateY(30px); transition: all 0.8s ease 1.5s;
+        }
+        .ending-desc.visible { opacity: 1; transform: translateY(0); }
+        .ending-restart {
+            margin-top: 60px; padding: 15px 50px;
+            background: linear-gradient(135deg, #c9a227 0%, #a07d1c 100%);
+            border: none; border-radius: 30px; color: #000;
+            font-size: 1.1em; font-weight: 600; cursor: pointer;
+            transition: all 0.4s; opacity: 0; transform: translateY(30px);
+        }
+        .ending-restart.visible { opacity: 1; transform: translateY(0); }
+        .ending-restart:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(201,162,39,0.4);
+        }
+
+        /* 响应式 */
+        @media (max-width: 900px) {
+            .loading-title { font-size: 2em; letter-spacing: 10px; }
+            .mini-map { display: none; }
+            .dialogue-text { font-size: 1.1em; }
+            .lang-options { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 加载界面 -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-title" id="loadingTitle">四渡赤水</div>
+        <div class="loading-subtitle" id="loadingSubtitle">1935 · 第一人称指挥体验</div>
+        <div class="loading-progress">
+            <div class="loading-bar" id="loadingBar"></div>
+        </div>
+        <div class="loading-text" id="loadingText">正在加载资源...</div>
+    </div>
+
+    <!-- 语言选择界面 -->
+    <div class="lang-screen" id="langScreen">
+        <div class="lang-title" id="langTitle">选择语言 / Select Language</div>
+        <div class="lang-options">
+            <div class="lang-option" onclick="selectLanguage('cn')">
+                <div class="lang-flag">🇨🇳</div>
+                <div class="lang-name">中文</div>
+                <div class="lang-name-en">Chinese</div>
+            </div>
+            <div class="lang-option" onclick="selectLanguage('en')">
+                <div class="lang-flag">🇺🇸</div>
+                <div class="lang-name">English</div>
+                <div class="lang-name-en">英文</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 开场介绍 -->
+    <div class="intro-screen" id="introScreen">
+        <div class="intro-text" id="introText1"></div>
+        <div class="intro-skip" onclick="skipIntro()">跳过 →</div>
+    </div>
+
+    <!-- 主游戏界面 -->
+    <div class="game-container" id="gameContainer">
+        <!-- 顶部状态栏 -->
+        <div class="top-bar">
+            <div class="chapter-info">
+                <div class="chapter-number" id="chapterNumber">第一章</div>
+                <div class="chapter-title" id="chapterTitle">土城之战</div>
+            </div>
+            <div class="stats-display">
+                <div class="stat-item">
+                    <div class="stat-label" id="labelTroops">兵力</div>
+                    <div class="stat-value stat-troops" id="troopsValue">37,000</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" id="labelSupply">补给</div>
+                    <div class="stat-value stat-supply" id="supplyValue">100</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" id="labelMorale">士气</div>
+                    <div class="stat-value stat-morale" id="moraleValue">100</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 场景区域 -->
+        <div class="scene-area">
+            <!-- 对话区域 -->
+            <div class="dialogue-area">
+                <div class="speaker-name" id="speakerName">彭雪枫</div>
+                <div class="dialogue-box" id="dialogueBox">
+                    <div class="dialogue-text" id="dialogueText"></div>
+                    <div class="voice-control">
+                        <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">🔊</button>
+                    </div>
+                    <div class="continue-hint" id="continueHint">点击继续 ▶</div>
+                </div>
+            </div>
+
+            <!-- 选项区域 -->
+            <div class="choices-area" id="choicesArea"></div>
+        </div>
+
+        <!-- 小地图 -->
+        <div class="mini-map">
+            <div class="map-title-small" id="mapTitleSmall">战役态势</div>
+            <div class="map-content" id="mapContent">
+                <div class="map-river"></div>
+            </div>
+        </div>
+
+        <!-- 语言切换按钮 -->
+        <button class="lang-switch-btn" id="langSwitchBtn" onclick="toggleLanguage()">
+            🌐 中文 / EN
+        </button>
+
+        <!-- 背景音乐控制 -->
+        <div class="bgm-control">
+            <button class="bgm-btn" id="bgmBtn" onclick="toggleBGM()">🎵</button>
+        </div>
+    </div>
+
+    <!-- 结局画面 -->
+    <div class="ending-screen" id="endingScreen">
+        <div class="ending-grade" id="endingGrade">卓越统帅</div>
+        <div class="ending-stats" id="endingStats">
+            <div class="ending-stat">
+                <div class="ending-stat-label" id="endLabelTroops">剩余兵力</div>
+                <div class="ending-stat-value stat-troops" id="endTroops">35,000</div>
+            </div>
+            <div class="ending-stat">
+                <div class="ending-stat-label" id="endLabelSupply">补给水平</div>
+                <div class="ending-stat-value stat-supply" id="endSupply">85</div>
+            </div>
+            <div class="ending-stat">
+                <div class="ending-stat-label" id="endLabelMorale">士气水平</div>
+                <div class="ending-stat-value stat-morale" id="endMorale">92</div>
+            </div>
+        </div>
+        <div class="ending-desc" id="endingDesc">
+            用兵如神！你完美复刻了四渡赤水的光辉战例，红军因你而重获新生。历史将铭记这一奇迹！
+        </div>
+        <button class="ending-restart" id="endingRestart" onclick="restartGame()">重新体验</button>
+    </div>
+
+    <!-- 背景音乐 -->
+    <audio id="bgMusic" loop crossorigin="anonymous">
+        <source src="https://raw.githubusercontent.com/Y-129/game/main/changzheng_xinnian.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // 游戏数据（由于篇幅原因，这里是精简的核心数据）
+        const CONFIG = { defaultLang: 'cn', typingSpeed: 40, autoPlayVoice: true };
+        const I18N = {
+            cn: { loadingTitle: '四渡赤水', loadingSubtitle: '1935 · 第一人称指挥体验', loadingText: '正在加载资源...',
+                    langTitle: '选择语言', labelTroops: '兵力', labelSupply: '补给', labelMorale: '士气',
+                    mapTitleSmall: '战役态势', continueHint: '点击继续 ▶', endLabelTroops: '剩余兵力',
+                    endLabelSupply: '补给水平', endLabelMorale: '士气水平', restartBtn: '重新体验',
+                    introTexts: ['1935年1月，贵州遵义。', '湘江一役，中央红军从八万六千人锐减至三万余人。',
+                                '鲜血染红了江水，也染红了每一个红军指挥员的眼睛。',
+                                '此时此刻，你——彭雪枫，红十三团团长。', '历史的重任，落在了你的肩上……'],
+                    grades: { excellent: { title: '卓越统帅', class: 'excellent' },
+                            good: { title: '优秀指挥', class: 'good' },
+                            normal: { title: '良好', class: 'normal' },
+                            poor: { title: '勉强及格', class: 'poor' },
+                            bad: { title: '遗憾离场', class: 'bad' }} },
+            en: { loadingTitle: 'Crossing Chishui', loadingSubtitle: '1935 · Command Experience',
+                    loadingText: 'Loading resources...', langTitle: 'Select Language',
+                    labelTroops: 'Troops', labelSupply: 'Supply', labelMorale: 'Morale',
+                    mapTitleSmall: 'Battle Map', continueHint: 'Click to continue ▶',
+                    endLabelTroops: 'Remaining Troops', endLabelSupply: 'Supply Level',
+                    endLabelMorale: 'Morale Level', restartBtn: 'Play Again',
+                    introTexts: ['January 1935, Zunyi, Guizhou.', 'After Xiangjiang, Red Army reduced from 86,000 to 30,000.',
+                                'Blood stained the river red, and every commander\'s eyes.',
+                                'At this moment, you - Peng Xuefeng, Commander of 13th Regiment.',
+                                'The weight of history falls upon your shoulders...'],
+                    grades: { excellent: { title: 'Excellent Commander', class: 'excellent' },
+                            good: { title: 'Outstanding Commander', class: 'good' },
+                            normal: { title: 'Well Done', class: 'normal' },
+                            poor: { title: 'Passable', class: 'poor' },
+                            bad: { title: 'Learn and Try Again', class: 'bad' }} }
+        };
+        const GAME_DATA = { initialStats: { troops: 37000, supply: 100, morale: 100 },
+            mapLocations: { zunyi: { x: 70, y: 25, name: { cn: '遵义', en: 'Zunyi' } },
+                            tucheng: { x: 30, y: 45, name: { cn: '土城', en: 'Tucheng' } },
+                            crossing1: { x: 25, y: 52, name: { cn: '一渡', en: '1st' } },
+                            zhaxi: { x: 15, y: 35, name: { cn: '扎西', en: 'Zhaxi' } },
+                            crossing2: { x: 35, y: 58, name: { cn: '二渡', en: '2nd' } },
+                            loushan: { x: 65, y: 20, name: { cn: '娄山', en: 'Loushan' } },
+                            maotai: { x: 40, y: 65, name: { cn: '茅台', en: 'Maotai' } },
+                            victory: { x: 85, y: 40, name: { cn: '胜利', en: 'Victory' } } },
+            chapters: [ { id: 1, name: { cn: '第一章', en: 'Ch 1' }, title: { cn: '土城之战', en: 'Battle of Tucheng' } },
+                        { id: 2, name: { cn: '第二章', en: 'Ch 2' }, title: { cn: '一渡赤水', en: 'First Crossing' } },
+                        { id: 3, name: { cn: '第三章', en: 'Ch 3' }, title: { cn: '回师黔北', en: 'Return to Guizhou' } },
+                        { id: 4, name: { cn: '第四章', en: 'Ch 4' }, title: { cn: '遵义大捷', en: 'Great Victory' } },
+                        { id: 5, name: { cn: '第五章', en: 'Ch 5' }, title: { cn: '四渡赤水', en: 'Fourth Crossing' } } ],
+            scenes: { start: { chapter: 1, speaker: { cn: '旁白', en: 'Narrator' }, location: 'zunyi',
+                text: { cn: '遵义会议刚刚结束。会议室的烟雾还没有散尽，你站在柏公馆的二楼，望着远处黔北的群山。\n\n毛泽东的发言犹在耳边回响："我们的路线是正确的，但我们必须更加机动灵活。敌人有四十万，我们只有三万。这不是打硬仗的时候。"\n\n情报传来：川军郭勋祺部正星夜驰援土城，企图将我们围歼在赤水河畔。\n\n土城，这个赤水河边的小镇，即将成为决定红军命运的关键战场。',
+                        en: 'The Zunyi Conference has just concluded. You stand on the second floor of Bai Mansion, looking at the mountains.\n\nMao Zedong\'s words still echo: "Our line is correct, but we must be more mobile. The enemy has 400,000, we have only 30,000. This is not the time for pitched battles."\n\nIntelligence arrives: Guo Xunqi is rushing to Tucheng, attempting to annihilate us along the Chishui River.\n\nTucheng will soon become the battlefield that decides the Red Army\'s fate.' },
+                choices: [ { text: { cn: '集中优势兵力，在土城打一场歼灭战', en: 'Concentrate forces for decisive battle' }, next: 'scene1_a' },
+                            { text: { cn: '避敌锋芒，寻找机会西渡赤水', en: 'Avoid the enemy, seek to cross westward' }, next: 'scene1_b' },
+                            { text: { cn: '先派小股部队侦察，再做决定', en: 'Send scouts first, then decide' }, next: 'scene1_c' } ] },
+                scene1_a: { chapter: 1, speaker: { cn: '彭雪枫', en: 'Peng Xuefeng' }, location: 'tucheng',
+                    changes: { troops: -2000, supply: -15, morale: -10 },
+                    text: { cn: '你决定在土城打一场硬仗。\n\n红十三团作为主攻部队，向青杠坡发起了冲锋。但敌情远超预期——郭勋祺的模范师装备精良，战斗力远超黔军。\n\n激战从清晨打到黄昏，你的部队伤亡惨重。参谋长浑身是血地跑过来："团长！敌人增援到了！我们被包围了！"\n\n你望着漫山遍野的敌军，握紧了拳头。现在必须做出抉择了。',
+                            en: 'You decide to fight a hard battle at Tucheng.\n\nThe 13th Regiment charges Qinggangpo. But the enemy is stronger than expected - Guo Xunqi\'s Model Division is well-equipped, far superior to the Guizhou army.\n\nFierce battle rages from dawn to dusk. Your unit suffers heavy casualties. The Chief of Staff runs over: "Commander! Enemy reinforcements have arrived! We\'re surrounded!"\n\nYou look at the enemy covering the mountains, your fist clenched. A decision must be made now.' },
+                    choices: [ { text: { cn: '杀身成仁，与阵地共存亡', en: 'Fight to the death, defend the position' }, next: 'ending_death' },
+                                { text: { cn: '组织突围，西渡赤水', en: 'Organize breakout, cross westward' }, next: 'scene2' } ] },
+                scene1_b: { chapter: 1, speaker: { cn: '彭雪枫', en: 'Peng Xuefeng' }, location: 'crossing1',
+                    changes: { troops: -300, supply: -5, morale: 5 },
+                    text: { cn: '你选择了更为谨慎的策略。\n\n在土城外围进行了试探性进攻后，你敏锐地察觉到敌人的力量远超预期。"这不是我们能啃下来的骨头。"你向军委提出了建议。\n\n军委采纳了你的意见。1月29日凌晨，红军在元厚、土城一线连夜架起浮桥，迅速西渡赤水河。\n\n后卫部队炸毁了浮桥。当郭勋祺追到河边时，只看到了赤水滔滔，向东奔流。\n\n你站在西岸，回望东岸的火光。这只是开始……',
+                            en: 'You choose a more cautious strategy.\n\nAfter a probing attack on Tucheng\'s outskirts, you sense the enemy is far stronger than expected. "This is not a battle we can win."\n\nYour advice is accepted. Before dawn on January 29th, the Red Army builds pontoon bridges and rapidly crosses westward.\n\nThe rearguard blows up the bridges. When Guo Xunqi arrives, he only sees the Chishui River flowing east.\n\nYou stand on the west bank, looking back at the flames. This is just the beginning...' },
+                    choices: [ { text: { cn: '继续前进，向扎西进发', en: 'Continue advancing toward Zhaxi' }, next: 'scene2' } ] },
+                scene2: { chapter: 2, speaker: { cn: '彭雪枫', en: 'Peng Xuefeng' }, location: 'zhaxi',
+                    changes: { troops: -200, supply: -5, morale: 10 },
+                    text: { cn: '【扎西整编】\n\n部队进入了云南扎西地区进行短暂休整。这里是川滇黔三省交界，敌人的包围圈正在收紧。\n\n"必须轻装！"军委下达了命令。笨重的装备被炸毁，机关人员充实到连队。全军从三十个团缩编为十七个团。\n\n你站在扎西的山间，看着正在进行整编的部队。\n\n这支部队虽然人数减少了，但战斗力却在增强。\n\n而此刻，蒋介石正在调兵遣将，向扎西合围而来。\n\n下一步，该向何处去？',
+                            en: '[Zhaxi Reorganization]\n\nThe troops enter Zhaxi area for a brief rest. Here at the border of three provinces, the enemy encirclement is tightening.\n\n"We must travel light!" Heavy equipment is destroyed, headquarters staff are sent to reinforce companies. The army is downsized from 30 to 17 regiments.\n\nYou stand in the mountains of Zhaxi, watching the reorganization.\n\nThough fewer in number, this army\'s combat power is growing.\n\nMeanwhile, Chiang Kai-shek is massing troops. Where to go next?' },
+                    choices: [ { text: { cn: '杀个回马枪，二渡赤水，回师黔北', en: 'Turn back, second crossing, return to Guizhou' }, next: 'scene3_b' },
+                                { text: { cn: '继续西进，向四川腹地发展', en: 'Continue west into Sichuan' }, next: 'scene3_a' } ] },
+                scene3_b: { chapter: 3, speaker: { cn: '彭雪枫', en: 'Peng Xuefeng' }, location: 'crossing2',
+                    changes: { troops: -100, supply: 10, morale: 20 },
+                    text: { cn: '【二渡赤水】\n\n你向军委提出了一个大胆的建议：回师东进，二渡赤水，杀敌人一个回马枪！\n\n"敌人以为我们要西逃，主力都被调到川南了。黔北空虚，正好打他个措手不及！"\n\n军委批准了你的计划。\n\n2月18日至21日，红军从太平渡、二郎滩二渡赤水，回师黔北。\n\n当黔军发现你们的时候，已经晚了。\n\n娄山关，这个通往遵义的咽喉要道，就在眼前。\n\n拿下它，遵义就是我们的！',
+                            en: '[Second Crossing of Chishui]\n\nYou propose a bold plan to the Military Commission: turn back east, cross the river a second time, and strike the enemy when they least expect it!\n\n"The enemy thinks we\'re fleeing west. Their main force has been moved to southern Sichuan. Northern Guizhou is undefended - perfect timing for a surprise attack!"\n\nThe plan is approved.\n\nFrom February 18th to 21st, the Red Army crosses the Chishui River a second time.\n\nBy the time the Guizhou Army discovers your maneuver, it\'s already too late.\n\nLoushan Pass, the strategic gateway to Zunyi, is within reach. Take it, and Zunyi is ours!' },
+                    choices: [ { text: { cn: '派小股部队攀悬崖奇袭娄山关', en: 'Send troops to scale cliffs for surprise attack' }, next: 'scene4_b' } ] },
+                scene4_b: { chapter: 3, speaker: { cn: '彭雪枫', en: 'Peng Xuefeng' }, location: 'loushan',
+                    changes: { troops: -300, supply: 10, morale: 25 },
+                    text: { cn: '你派出了一支奇兵，从侧面的悬崖攀爬而上。\n\n这支奇兵在当地人的指引下，走了一条连采药人都不敢走的路，在深夜攀上了点金山的顶峰。\n\n当黎明的第一缕阳光照在关口时，敌人的背后突然响起了枪声。\n\n"敌人从天而降了！"敌军阵脚大乱。\n\n正面部队趁机发起冲锋，一举拿下了娄山关！\n\n这是一场完美的奇袭。你的军事才华，在这一战中展现得淋漓尽致。',
+                            en: 'You send an elite strike force to scale the cliffs on the flank.\n\nGuided by locals, this force takes a path even herb gatherers fear, climbing to the summit of Dianjin Mountain in the dead of night.\n\nAs the first rays of dawn touch the pass, gunfire erupts behind enemy lines.\n\n"The enemy has come from the sky!" The enemy formation falls into chaos.\n\nYour main force takes the opportunity to charge, seizing Loushan Pass in one stroke!\n\nThis is a perfect surprise attack. Your military talent shines brilliantly in this battle.' },
+                    choices: [ { text: { cn: '乘胜追击，收复遵义', en: 'Pursue the victory, recapture Zunyi' }, next: 'scene5' } ] },
+                scene5: { chapter: 4, speaker: { cn: '彭雪枫', en: 'Peng Xuefeng' }, location: 'zunyi',
+                    changes: { troops: 0, supply: 20, morale: 30 },
+                    text: { cn: '【遵义大捷】\n\n红军乘胜追击，在遵义城南重创吴奇伟部，取得了长征以来的第一个大胜仗！\n\n这一天，遵义城的老百姓纷纷走上街头，欢迎红军的归来。\n\n你骑在马上，看着两旁欢呼的人群，心中百感交集。\n\n从湘江惨败到遵义大捷，我们走了太久，牺牲了太多。\n\n但就在此时，蒋介石亲自飞到重庆指挥，调集了更多的兵力，准备将我们围歼在遵义地区。\n\n这只是暂时的胜利。真正的考验，还在后面。',
+                            en: '[Great Victory at Zunyi]\n\nThe Red Army pursues the fleeing enemy, inflicting heavy casualties on Wu Qiwei\'s forces south of Zunyi - the first major victory since the Long March began!\n\nOn this day, the people of Zunyi pour into the streets, welcoming the Red Army\'s return.\n\nYou ride on horseback, watching the cheering crowds, emotions swirling within you.\n\nFrom the devastating defeat at Xiangjiang to the great victory at Zunyi, we have come so far, sacrificed so much.\n\nBut at this moment, Chiang Kai-shek personally flies to Chongqing to take command, mobilizing even more troops to annihilate us in the Zunyi area.\n\nThis is only a temporary victory. The real test lies ahead.' },
+                    choices: [ { text: { cn: '三渡赤水，调敌西进', en: 'Third crossing, divert enemy westward' }, next: 'scene6_b' } ] },
+                scene6_b: { chapter: 5, speaker: { cn: '彭雪枫', en: 'Peng Xuefeng' }, location: 'maotai',
+                    changes: { troops: -100, supply: -10, morale: 15 },
+                    text: { cn: '【三渡赤水】\n\n3月16日，茅台渡口。\n\n红军公开地、大摇大摆地三渡赤水，摆出了要北渡长江的姿态。\n\n你站在渡船上，看着东岸的敌机在盘旋侦察。"让他们看。让他们报给蒋介石。我们就是要让他知道，我们要过江。"\n\n蒋介石果然中计了。他急令各路大军向川南集结，妄图在长江南岸围歼我们。\n\n但这只是一出好戏的开头。\n\n当敌军主力纷纷向西调动的时候，你知道——该四渡赤水了。',
+                            en: '[Third Crossing of Chishui]\n\nMarch 16th, Maotai Ferry.\n\nThe Red Army openly, brazenly crosses the Chishui River a third time, making a show of intending to cross the Yangtze northward.\n\nYou stand on the ferry, watching enemy planes circling and reconnoitering on the east bank. "Let them watch. Let them report to Chiang Kai-shek. We WANT him to know we\'re crossing the river."\n\nChiang Kai-shek takes the bait. He urgently orders all armies to converge on southern Sichuan.\n\nBut this is only the beginning of a masterful performance.\n\nAs the enemy main forces all move westward, you know - it\'s time for the fourth crossing.' },
+                    choices: [ { text: { cn: '秘密折返，四渡赤水，跳出包围圈！', en: 'Secretly return, fourth crossing, break out!' }, next: 'scene_final_victory' } ] },
+                scene_final_victory: { chapter: 5, speaker: { cn: '旁白', en: 'Narrator' }, location: 'victory',
+                    changes: { troops: 0, supply: 0, morale: 0 },
+                    text: { cn: '【四渡赤水·伟大胜利】\n\n3月21日，二郎滩。\n\n红军主力秘密、迅速地四渡赤水，一举跳出了敌人的包围圈！\n\n当蒋介石的各路大军还在川南开赴"剿共"前线的时候，你们已经出现在了贵阳城下，随后又威逼昆明，巧妙地调出了滇军主力，然后虚晃一枪，巧渡金沙江，彻底跳出了数十万敌军的围追堵截！\n\n从1月29日一渡赤水到5月9日渡过金沙江，三个半月的时间里，你们在赤水河上来来回回走了四趟。\n\n这不是简单的行军。\n\n这是战争史上的奇迹。\n\n这是毛泽东军事指挥艺术的巅峰之作。\n\n这是——四渡赤水！\n\n而你，作为这一伟大历史的亲历者和参与者，你的名字将永远铭刻在共和国的丰碑上。',
+                            en: '[Fourth Crossing · Great Victory]\n\nMarch 21st, Erlang Beach.\n\nThe main Red Army force secretly and rapidly crosses the Chishui River a fourth time, breaking out of the enemy encirclement in one stroke!\n\nWhile Chiang Kai-shek\'s armies are still marching to the "communist suppression" front in southern Sichuan, you have already appeared at Guiyang\'s gates, then threatened Kunming, skillfully drawing out the Yunnan Army main force, then feinted and skillfully crossed the Jinsha River - completely shaking off hundreds of thousands of pursuing and blocking enemy forces!\n\nFrom the first crossing on January 29th to crossing the Jinsha River on May 9th, in three and a half months, you have crossed back and forth across the Chishui River four times.\n\nThis was no simple march. This was a miracle in the history of warfare. This was the pinnacle of Mao Zedong\'s military command art. This was - Crossing the Chishui River Four Times!' },
+                    choices: [], isEnding: true },
+                ending_death: { chapter: 1, speaker: { cn: '旁白', en: 'Narrator' }, location: 'tucheng',
+                    changes: { troops: -30000, supply: -100, morale: -100 },
+                    text: { cn: '青杠坡上，你和你的战士们战斗到了最后一刻。\n\n子弹打光了，就用刺刀。刺刀断了，就用石头。\n\n当敌人冲上阵地的时候，你手里只剩下了一把已经卷刃的大刀。\n\n你望着赤水河水，它还在向东奔流。\n\n你知道，中国革命的道路，也会像这河水一样，虽然曲折，但终究会奔涌向前，汇入大海。\n\n你举起大刀，冲向了敌军。\n\n这一天，1935年1月28日。\n\n彭雪枫，年仅27岁。\n\n（游戏结束，但历史上的彭雪枫将军并没有牺牲在这里。他走完了长征，走完了抗日战争，走完了解放战争，1944年牺牲在抗日前线。你的选择，改变了历史——但真正的历史，更加惊心动魄。）',
+                            en: 'On Qinggangpo, you and your soldiers fight to the last moment.\n\nWhen bullets run out, bayonets. When bayonets break, stones.\n\nWhen the enemy charges the position, all you hold is a sword with a rolled edge.\n\nYou look at the Chishui River, still flowing east.\n\nYou know that China\'s revolutionary path, like this river, though winding, will surge forward, eventually reaching the sea.\n\nYou raise your sword and charge the enemy.\n\nThis day, January 28th, 1935. Peng Xuefeng, age 27.\n\n(Game over. In actual history, General Peng Xuefeng did not die here. He completed the Long March, fought through the War of Resistance Against Japan, and the Liberation War, sacrificing in 1944 on the front lines. Your choice changed history - but real history is even more thrilling.)' },
+                    choices: [], isEnding: true, forceGrade: 'bad' } }
+        };
+
+        let gameState = {
+            currentLang: 'cn', currentScene: null,
+            stats: { ...GAME_DATA.initialStats },
+            visitedLocations: new Set(),
+            isTyping: false, isVoicePlaying: false, isBGMPlaying: false,
+            textFullyDisplayed: false
+        };
+
+        const speechSynthesis = window.speechSynthesis;
+        let currentUtterance = null;
+
+        function speakText(text) {
+            if (!CONFIG.autoPlayVoice) return;
+            stopVoice();
+            currentUtterance = new SpeechSynthesisUtterance(text);
+            currentUtterance.lang = gameState.currentLang === 'cn' ? 'zh-CN' : 'en-US';
+            currentUtterance.rate = 0.9;
+            currentUtterance.pitch = 1;
+            currentUtterance.onstart = () => { gameState.isVoicePlaying = true; updateVoiceButton(); };
+            currentUtterance.onend = () => { gameState.isVoicePlaying = false; updateVoiceButton(); };
+            speechSynthesis.speak(currentUtterance);
+        }
+
+        function stopVoice() {
+            if (speechSynthesis.speaking) speechSynthesis.cancel();
+            gameState.isVoicePlaying = false; updateVoiceButton();
+        }
+
+        function toggleVoice() {
+            if (gameState.isVoicePlaying) stopVoice();
+            else if (gameState.currentScene) {
+                const text = gameState.currentLang === 'cn' ? gameState.currentScene.text.cn : gameState.currentScene.text.en;
+                speakText(text);
+            }
+        }
+
+        function updateVoiceButton() {
+            const btn = document.getElementById('voiceBtn');
+            if (gameState.isVoicePlaying) { btn.classList.add('playing'); btn.textContent = '🔊'; }
+            else { btn.classList.remove('playing'); btn.textContent = '🔊'; }
+        }
+
+        function toggleBGM() {
+            const audio = document.getElementById('bgMusic');
+            const btn = document.getElementById('bgmBtn');
+            if (gameState.isBGMPlaying) { audio.pause(); btn.classList.remove('playing'); }
+            else { audio.play().catch(e => console.log('BGM play failed:', e)); btn.classList.add('playing'); }
+            gameState.isBGMPlaying = !gameState.isBGMPlaying;
+        }
+
+        function startLoading() {
+            const bar = document.getElementById('loadingBar');
+            const text = document.getElementById('loadingText');
+            const texts = gameState.currentLang === 'cn' ? ['正在加载资源...', '正在初始化场景...', '准备就绪'] : ['Loading...', 'Initializing...', 'Ready'];
+            let progress = 0, textIndex = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15 + 5;
+                if (progress >= 100) { progress = 100; clearInterval(interval); setTimeout(() => { document.getElementById('loadingScreen').classList.add('hidden'); document.getElementById('langScreen').classList.add('active'); }, 500); }
+                bar.style.width = progress + '%';
+                if (progress > 25 && textIndex === 0) textIndex = 1;
+                if (progress > 60 && textIndex === 1) textIndex = 2;
+                text.textContent = texts[textIndex];
+            }, 200);
+        }
+
+        function selectLanguage(lang) {
+            gameState.currentLang = lang; updateLanguageDisplay();
+            document.getElementById('langScreen').classList.remove('active');
+            setTimeout(() => { document.getElementById('introScreen').classList.add('active'); startIntro(); }, 500);
+        }
+
+        function toggleLanguage() {
+            gameState.currentLang = gameState.currentLang === 'cn' ? 'en' : 'cn';
+            updateLanguageDisplay();
+            if (gameState.currentScene) displayScene(gameState.currentScene);
+        }
+
+        function updateLanguageDisplay() {
+            const i18n = I18N[gameState.currentLang];
+            document.getElementById('loadingTitle').textContent = i18n.loadingTitle;
+            document.getElementById('loadingSubtitle').textContent = i18n.loadingSubtitle;
+            document.getElementById('loadingText').textContent = i18n.loadingText;
+            document.getElementById('langTitle').textContent = i18n.langTitle;
+            document.getElementById('labelTroops').textContent = i18n.labelTroops;
+            document.getElementById('labelSupply').textContent = i18n.labelSupply;
+            document.getElementById('labelMorale').textContent = i18n.labelMorale;
+            document.getElementById('mapTitleSmall').textContent = i18n.mapTitleSmall;
+            document.getElementById('continueHint').textContent = i18n.continueHint;
+            document.getElementById('endLabelTroops').textContent = i18n.endLabelTroops;
+            document.getElementById('endLabelSupply').textContent = i18n.endLabelSupply;
+            document.getElementById('endLabelMorale').textContent = i18n.endLabelMorale;
+            document.getElementById('endingRestart').textContent = i18n.restartBtn;
+        }
+
+        let introCurrentIndex = 0, introTimeout = null;
+        function startIntro() {
+            const texts = I18N[gameState.currentLang].introTexts;
+            introCurrentIndex = 0; showIntroText(texts[0]);
+        }
+        function showIntroText(text) {
+            const el = document.getElementById('introText1'); el.textContent = text; el.classList.add('visible');
+            introTimeout = setTimeout(() => {
+                el.classList.remove('visible'); setTimeout(() => {
+                    introCurrentIndex++;
+                    const texts = I18N[gameState.currentLang].introTexts;
+                    if (introCurrentIndex < texts.length) showIntroText(texts[introCurrentIndex]);
+                    else finishIntro();
+                }, 500);
+            }, 3000);
+        }
+        function skipIntro() { if (introTimeout) clearTimeout(introTimeout); finishIntro(); }
+        function finishIntro() {
+            document.getElementById('introScreen').classList.remove('active');
+            document.getElementById('gameContainer').classList.add('active');
+            initMap(); startGame();
+        }
+
+        function initMap() {
+            const mapContent = document.getElementById('mapContent');
+            for (const [locId, locData] of Object.entries(GAME_DATA.mapLocations)) {
+                const point = document.createElement('div');
+                point.className = 'map-point'; point.id = `map-point-${locId}`;
+                point.style.left = locData.x + '%'; point.style.top = locData.y + '%';
+                const label = document.createElement('div');
+                label.className = 'map-point-label'; label.textContent = locData.name[gameState.currentLang];
+                point.appendChild(label); mapContent.appendChild(point);
+            }
+            const armyDot = document.createElement('div');
+            armyDot.className = 'red-army-dot'; armyDot.id = 'red-army-dot';
+            mapContent.appendChild(armyDot);
+        }
+
+        function updateMapLocation(locId) {
+            const loc = GAME_DATA.mapLocations[locId]; if (!loc) return;
+            const dot = document.getElementById('red-army-dot');
+            dot.style.left = loc.x + '%'; dot.style.top = loc.y + '%';
+            for (const [id, data] of Object.entries(GAME_DATA.mapLocations)) {
+                const point = document.getElementById(`map-point-${id}`);
+                if (point) { point.classList.remove('current'); if (gameState.visitedLocations.has(id)) point.classList.add('visited'); }
+            }
+            const currentPoint = document.getElementById(`map-point-${locId}`);
+            if (currentPoint) currentPoint.classList.add('current');
+            gameState.visitedLocations.add(locId);
+        }
+
+        function startGame() {
+            gameState.stats = { ...GAME_DATA.initialStats };
+            gameState.visitedLocations.clear(); updateStatsDisplay(); goToScene('start');
+        }
+
+        function goToScene(sceneId) {
+            const scene = GAME_DATA.scenes[sceneId]; if (!scene) return;
+            gameState.currentScene = scene;
+            const chapter = GAME_DATA.chapters[scene.chapter - 1];
+            if (chapter) {
+                document.getElementById('chapterNumber').textContent = chapter.name[gameState.currentLang];
+                document.getElementById('chapterTitle').textContent = chapter.title[gameState.currentLang];
+            }
+            updateMapLocation(scene.location);
+            if (scene.changes) {
+                gameState.stats.troops = Math.max(0, gameState.stats.troops + scene.changes.troops);
+                gameState.stats.supply = Math.max(0, Math.min(100, gameState.stats.supply + scene.changes.supply));
+                gameState.stats.morale = Math.max(0, Math.min(100, gameState.stats.morale + scene.changes.morale));
+                updateStatsDisplay();
+            }
+            displayScene(scene);
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('troopsValue').textContent = gameState.stats.troops.toLocaleString();
+            document.getElementById('supplyValue').textContent = Math.round(gameState.stats.supply);
+            document.getElementById('moraleValue').textContent = Math.round(gameState.stats.morale);
+        }
+
+        function displayScene(scene) {
+            stopVoice();
+            document.getElementById('continueHint').style.display = 'none';
+            document.getElementById('choicesArea').innerHTML = '';
+            const speakerEl = document.getElementById('speakerName');
+            speakerEl.textContent = scene.speaker[gameState.currentLang];
+            speakerEl.classList.remove('visible'); setTimeout(() => speakerEl.classList.add('visible'), 100);
+            const dialogueBox = document.getElementById('dialogueBox');
+            dialogueBox.classList.remove('visible'); setTimeout(() => dialogueBox.classList.add('visible'), 300);
+            const text = gameState.currentLang === 'cn' ? scene.text.cn : scene.text.en;
+            typeWriter(text, () => {
+                gameState.textFullyDisplayed = true;
+                document.getElementById('continueHint').style.display = 'block';
+                if (CONFIG.autoPlayVoice) speakText(text);
+                if (scene.choices && scene.choices.length > 0) displayChoices(scene.choices);
+                else if (scene.isEnding) setTimeout(() => showEnding(scene), 1500);
+            });
+            dialogueBox.onclick = () => {
+                if (!gameState.textFullyDisplayed) skipTypeWriter();
+                else if (scene.isEnding) showEnding(scene);
+            };
+        }
+
+        let typeWriterTimer = null, typeWriterText = '', typeWriterIndex = 0, typeWriterCallback = null;
+        function typeWriter(text, callback) {
+            gameState.textFullyDisplayed = false; gameState.isTyping = true;
+            typeWriterText = text; typeWriterIndex = 0; typeWriterCallback = callback;
+            document.getElementById('dialogueText').textContent = ''; typeNextChar();
+        }
+        function typeNextChar() {
+            if (typeWriterIndex >= typeWriterText.length) { gameState.isTyping = false; if (typeWriterCallback) typeWriterCallback(); return; }
+            document.getElementById('dialogueText').textContent = typeWriterText.substring(0, typeWriterIndex + 1);
+            typeWriterIndex++;
+            const char = typeWriterText[typeWriterIndex - 1];
+            let delay = CONFIG.typingSpeed; if (char === '\n') delay = 200; if (char === '。' || char === '！' || char === '？' || char === '.') delay = 150;
+            typeWriterTimer = setTimeout(typeNextChar, delay);
+        }
+        function skipTypeWriter() {
+            if (typeWriterTimer) clearTimeout(typeWriterTimer);
+            document.getElementById('dialogueText').textContent = typeWriterText;
+            gameState.isTyping = false; gameState.textFullyDisplayed = true;
+            if (typeWriterCallback) typeWriterCallback();
+        }
+
+        function displayChoices(choices) {
+            const area = document.getElementById('choicesArea'); area.innerHTML = '';
+            choices.forEach((choice, index) => {
+                const btn = document.createElement('button'); btn.className = 'choice-btn';
+                btn.innerHTML = `<span class="choice-letter">${String.fromCharCode(65 + index)}.</span>${choice.text[gameState.currentLang]}`;
+                btn.onclick = () => goToScene(choice.next);
+                setTimeout(() => { btn.classList.add('visible'); }, index * 200);
+                area.appendChild(btn);
+            });
+        }
+
+        function showEnding(scene) {
+            const endingScreen = document.getElementById('endingScreen'); endingScreen.classList.add('active');
+            let gradeKey; if (scene.forceGrade) gradeKey = scene.forceGrade;
+            else {
+                const troops = gameState.stats.troops;
+                if (troops >= 33000) gradeKey = 'excellent';
+                else if (troops >= 28000) gradeKey = 'good';
+                else if (troops >= 22000) gradeKey = 'normal';
+                else if (troops >= 15000) gradeKey = 'poor';
+                else gradeKey = 'bad';
+            }
+            const grade = I18N[gameState.currentLang].grades[gradeKey];
+            const gradeEl = document.getElementById('endingGrade');
+            gradeEl.textContent = grade.title; gradeEl.className = 'ending-grade'; gradeEl.classList.add(grade.class);
+            document.getElementById('endTroops').textContent = gameState.stats.troops.toLocaleString();
+            document.getElementById('endSupply').textContent = Math.round(gameState.stats.supply);
+            document.getElementById('endMorale').textContent = Math.round(gameState.stats.morale);
+            const endings = {
+                cn: {
+                    excellent: '用兵如神！你完美复刻了四渡赤水的光辉战例。你的每一次决策都体现了出色的军事智慧，红军因你而重获新生。历史将铭记这一奇迹！',
+                    good: '了不起！你成功带领红军跳出了包围圈。虽然付出了一定代价，但主力得以保存，士气依然高昂。这是一次值得骄傲的胜利！',
+                    normal: '干得漂亮！你带领红军完成了突围任务。虽然损失不小，但革命的火种依然在燃烧。总结经验，继续前进！',
+                    poor: '损失惨重，但你活着走出来了。红军还在，希望还在。向先烈学习，绝境中依然有胜利的曙光！',
+                    bad: '几乎全军覆没……但历史不容假设。四渡赤水是人类战争史上的奇迹，重来一次，你一定能做得更好！'
+                },
+                en: {
+                    excellent: 'Masterful strategy! You perfectly recreated the glorious example of Four Crossings. Every decision demonstrates outstanding military wisdom. The Red Army is reborn because of you!',
+                    good: 'Excellent! You successfully led the Red Army out of encirclement. Though a price was paid, the main force is preserved and morale remains high!',
+                    normal: 'Well done! You led the Red Army through the breakout. Though losses were significant, the spark of revolution still burns!',
+                    poor: 'Heavy losses, but you survived. The Red Army still exists, and hope remains. Even in desperate situations, there is light of victory!',
+                    bad: 'Near total annihilation... but history allows no assumptions. Four Crossings was a miracle in human warfare history. Try again, and you will surely do better!'
+                }
+            };
+            document.getElementById('endingDesc').textContent = endings[gameState.currentLang][gradeKey];
+            setTimeout(() => document.getElementById('endingGrade').classList.add('visible'), 300);
+            setTimeout(() => document.getElementById('endingStats').classList.add('visible'), 800);
+            setTimeout(() => document.getElementById('endingDesc').classList.add('visible'), 1300);
+            setTimeout(() => document.getElementById('endingRestart').classList.add('visible'), 1800);
+        }
+
+        function restartGame() {
+            document.getElementById('endingScreen').classList.remove('active');
+            setTimeout(() => {
+                document.getElementById('endingGrade').classList.remove('visible');
+                document.getElementById('endingStats').classList.remove('visible');
+                document.getElementById('endingDesc').classList.remove('visible');
+                document.getElementById('endingRestart').classList.remove('visible');
+            }, 500);
+            startGame();
+        }
+
+        window.onload = function() { setTimeout(startLoading, 500); };
+        document.body.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+    </script>
+</body>
+</html>
