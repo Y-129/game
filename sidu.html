@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四渡赤水 · Crossing the Chishui</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&family=Cinzel:wght@400;700;900&family=Cormorant+Garamond:wght@400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--red-dark:#8B0000;--red-army:#CC3333;--gold:#D4A843;--parchment:#F5E6C8;--parchment-dark:#E8D5A8;--ink:#2C1810;--ink-light:#5C4033;--river:#4A7C9B}
+body{font-family:'Noto Sans SC',sans-serif;background:#0a0a0a;color:var(--ink);overflow:hidden;height:100vh}
+
+/* ===== START SCREEN ===== */
+#start-screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;overflow:hidden}
+.start-bg{position:absolute;inset:0;background:url('https://www.coze.cn/s/Z_mnPZL_0Mw/') center/cover no-repeat;filter:brightness(0.25) saturate(0.6)}
+.start-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,0.7) 100%)}
+.start-content{position:relative;z-index:2;text-align:center}
+.start-title{font-family:'Noto Serif SC',serif;font-size:68px;font-weight:900;color:var(--gold);text-shadow:0 0 60px rgba(212,168,67,0.3),0 4px 12px rgba(0,0,0,0.9);letter-spacing:16px;margin-bottom:4px}
+.start-title-en{font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#c9a96e;letter-spacing:6px;margin-bottom:40px;opacity:0.7}
+.start-quote{max-width:550px;text-align:center;color:#e8d5a8;font-size:14px;line-height:2;margin-bottom:20px;opacity:0.6;font-family:'Noto Serif SC',serif}
+.start-quote-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;margin-bottom:40px;opacity:0.5;color:#c9a96e}
+.lang-switch{display:flex;gap:12px;margin-bottom:30px}
+.lang-btn{background:transparent;border:1px solid rgba(212,168,67,0.4);color:var(--gold);padding:8px 28px;font-size:14px;cursor:pointer;font-family:'Noto Sans SC',serif;letter-spacing:3px;transition:all 0.3s;border-radius:3px}
+.lang-btn:hover,.lang-btn.active{background:rgba(212,168,67,0.15);border-color:var(--gold)}
+.start-btn{background:linear-gradient(135deg,var(--red-dark),var(--red-army));color:var(--gold);border:2px solid var(--gold);padding:16px 60px;font-size:20px;font-family:'Noto Serif SC',serif;letter-spacing:8px;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden}
+.start-btn:hover{background:linear-gradient(135deg,#a00000,#dd4444);transform:scale(1.05);box-shadow:0 0 30px rgba(204,51,51,0.5)}
+#start-screen.fade-out{opacity:0;pointer-events:none;transition:opacity 0.8s}
+
+/* ===== GAME ===== */
+#game-container{display:none;height:100vh;flex-direction:column;background:url('https://www.coze.cn/s/gWREDyI12xo/') center/cover no-repeat fixed}
+#game-container.active{display:flex}
+
+.top-bar{background:linear-gradient(180deg,#1a0e06,#2C1810,#3d2415);color:var(--gold);padding:8px 20px;display:flex;justify-content:space-between;align-items:center;font-family:'Noto Serif SC',serif;flex-shrink:0;border-bottom:2px solid rgba(212,168,67,0.6);min-height:50px}
+.chapter-title{font-size:16px;font-weight:700;letter-spacing:3px}
+.top-controls{display:flex;align-items:center;gap:16px}
+.audio-controls{display:flex;align-items:center;gap:8px}
+.audio-btn{background:rgba(212,168,67,0.12);border:1px solid rgba(212,168,67,0.3);color:var(--gold);width:30px;height:30px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.2s}
+.audio-btn:hover{background:rgba(212,168,67,0.25)}
+.audio-btn.active{background:rgba(212,168,67,0.3);border-color:var(--gold)}
+.vol-slider{width:50px;height:3px;-webkit-appearance:none;appearance:none;background:rgba(212,168,67,0.25);border-radius:2px;outline:none}
+.vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;background:var(--gold);border-radius:50%;cursor:pointer}
+.lang-mini{display:flex;gap:6px}
+.lang-mini-btn{background:transparent;border:1px solid rgba(212,168,67,0.3);color:var(--gold);padding:2px 10px;font-size:11px;cursor:pointer;border-radius:3px;transition:all 0.2s;font-weight:700}
+.lang-mini-btn.active{background:rgba(212,168,67,0.25);border-color:var(--gold)}
+.resources{display:flex;gap:18px;font-size:13px;align-items:center}
+.back-btn{background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.35);color:var(--gold);padding:3px 12px;font-size:11px;cursor:pointer;border-radius:4px;transition:all 0.2s;font-family:'Noto Serif SC',serif;letter-spacing:2px;display:none;white-space:nowrap}
+.back-btn:hover{background:rgba(212,168,67,0.25);border-color:var(--gold)}
+.back-btn.show{display:inline-flex;align-items:center;gap:4px}
+.resource-item{display:flex;align-items:center;gap:5px}
+.resource-icon{font-size:16px}
+.resource-value{font-weight:700;color:#fff}
+.resource-label{opacity:0.6;font-size:11px}
+
+.game-main{flex:1;display:flex;overflow:hidden;min-height:0}
+
+/* ===== MAP PANEL ===== */
+.map-panel{width:50%;position:relative;overflow:hidden;background:#2a2a2a}
+.map-base-img{width:100%;height:100%;object-fit:contain;display:block}
+.map-overlay{position:absolute;inset:0;pointer-events:none}
+.map-node{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer;z-index:5;transition:all 0.4s ease}
+.map-node-dot{width:12px;height:12px;border-radius:50%;background:rgba(180,160,120,0.6);border:2px solid rgba(120,100,70,0.5);transition:all 0.4s}
+.map-node.active .map-node-dot{background:#CC3333;border-color:#ffdd44;box-shadow:0 0 12px rgba(204,51,51,0.7),0 0 24px rgba(204,51,51,0.3);width:16px;height:16px;animation:nodePulse 1.5s infinite}
+.map-node.visited .map-node-dot{background:var(--gold);border-color:#c49a30;box-shadow:0 0 8px rgba(212,168,67,0.4)}
+.map-node.current .map-node-dot{background:#CC3333;border-color:#ffdd44;box-shadow:0 0 16px rgba(204,51,51,0.8),0 0 32px rgba(204,51,51,0.4);width:18px;height:18px;animation:nodePulse 1s infinite}
+@keyframes nodePulse{0%,100%{transform:scale(1);box-shadow:0 0 12px rgba(204,51,51,0.7)}50%{transform:scale(1.3);box-shadow:0 0 24px rgba(204,51,51,0.9)}}
+.map-node-label{display:none}
+.map-routes{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.map-routes line{stroke:rgba(204,51,51,0.15);stroke-width:2;transition:all 0.6s}
+.map-routes line.traversed{stroke:rgba(204,51,51,0.7);stroke-width:3;filter:drop-shadow(0 0 4px rgba(204,51,51,0.5))}
+.map-routes line.active{stroke:#CC3333;stroke-width:3;stroke-dasharray:6 4;animation:routeDash 0.8s linear infinite;filter:drop-shadow(0 0 6px rgba(204,51,51,0.6))}
+@keyframes routeDash{to{stroke-dashoffset:-10}}
+.map-node-badge{display:none}
+.map-army{position:absolute;transform:translate(-50%,-50%);z-index:10;transition:all 1.2s cubic-bezier(0.25,0.46,0.45,0.94)}
+.map-army-star{width:28px;height:28px;position:relative;filter:drop-shadow(0 0 8px rgba(204,51,51,0.6))}
+.map-army-star::before{content:'★';font-size:28px;color:#CC3333;text-shadow:0 0 8px rgba(204,51,51,0.5);animation:armyGlow 2s infinite}
+@keyframes armyGlow{0%,100%{filter:drop-shadow(0 0 6px rgba(204,51,51,0.6))}50%{filter:drop-shadow(0 0 14px rgba(204,51,51,0.9))}}
+.crossing-indicator{position:absolute;top:12px;left:12px;background:rgba(0,0,0,0.8);color:var(--gold);padding:6px 14px;border-radius:4px;font-size:13px;font-family:'Noto Serif SC',serif;letter-spacing:2px;border-left:3px solid var(--red-army);z-index:20}
+.map-legend{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.85);color:#ddd;padding:8px 12px;border-radius:5px;font-size:10px;line-height:1.8;z-index:20}
+.map-legend-item{display:flex;align-items:center;gap:5px}
+.legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+
+/* ===== DYNAMIC MAP ELEMENTS ===== */
+.map-anim-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+.map-smoke{position:absolute;width:30px;height:30px;border-radius:50%;z-index:4;pointer-events:none;opacity:0;transition:opacity 0.8s;filter:blur(3px)}
+.map-smoke.visible{opacity:0.35;animation:smokeRise 3s infinite}
+@keyframes smokeRise{0%{transform:translateY(0) scale(1);opacity:0.35}50%{transform:translateY(-8px) scale(1.3);opacity:0.15}100%{transform:translateY(-16px) scale(1.6);opacity:0}}
+.map-flag{position:absolute;z-index:6;pointer-events:none;opacity:0;transition:opacity 0.5s}
+.map-flag.visible{opacity:1}
+.map-flag-pole{width:2px;height:18px;background:rgba(255,255,255,0.6);margin-left:3px}
+.map-flag-cloth{width:12px;height:8px;background:#CC3333;position:relative;top:-10px;left:4px;animation:flagWave 1.5s ease-in-out infinite;transform-origin:left center;border-radius:0 1px 1px 0}
+@keyframes flagWave{0%,100%{transform:skewY(0deg)}25%{transform:skewY(-3deg) scaleX(0.95)}75%{transform:skewY(2deg) scaleX(1.05)}}
+.crossing-indicator{position:absolute;top:12px;left:12px;background:rgba(0,0,0,0.8);color:var(--gold);padding:6px 14px;border-radius:4px;font-size:13px;font-family:'Noto Serif SC',serif;letter-spacing:2px;border-left:3px solid var(--red-army);z-index:20}
+.map-legend{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.85);color:#ddd;padding:8px 12px;border-radius:5px;font-size:10px;line-height:1.8;z-index:20}
+.map-legend-item{display:flex;align-items:center;gap:5px}
+.legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+
+/* ===== DYNAMIC MAP ELEMENTS ===== */
+.map-anim-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+.map-smoke{position:absolute;width:30px;height:30px;border-radius:50%;z-index:4;pointer-events:none;opacity:0;transition:opacity 0.8s;filter:blur(3px)}
+.map-smoke.visible{opacity:0.35;animation:smokeRise 3s infinite}
+@keyframes smokeRise{0%{transform:translateY(0) scale(1);opacity:0.35}50%{transform:translateY(-8px) scale(1.3);opacity:0.15}100%{transform:translateY(-16px) scale(1.6);opacity:0}}
+.map-flag{position:absolute;z-index:6;pointer-events:none;opacity:0;transition:opacity 0.5s}
+.map-flag.visible{opacity:1}
+.map-flag-pole{width:2px;height:18px;background:rgba(255,255,255,0.6);margin-left:3px}
+.map-flag-cloth{width:12px;height:8px;background:#CC3333;position:relative;top:-10px;left:4px;animation:flagWave 1.5s ease-in-out infinite;transform-origin:left center;border-radius:0 1px 1px 0}
+@keyframes flagWave{0%,100%{transform:skewY(0deg)}25%{transform:skewY(-3deg) scaleX(0.95)}75%{transform:skewY(2deg) scaleX(1.05)}}
+.map-campfire{position:absolute;z-index:4;pointer-events:none;opacity:0;transition:opacity 0.5s}
+.map-campfire.visible{opacity:1}
+.map-campfire-flame{width:4px;height:6px;background:radial-gradient(ellipse at bottom,#ff6600,#ff3300,transparent);border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;animation:flame 0.8s ease-in-out infinite alternate;position:relative}
+.map-campfire-glow{position:absolute;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,rgba(255,100,0,0.25),transparent);top:-4px;left:-5px;animation:glowPulse 2s infinite}
+@keyframes flame{0%{transform:scaleX(1) scaleY(1);opacity:0.9}100%{transform:scaleX(0.7) scaleY(1.2);opacity:1}}
+@keyframes glowPulse{0%,100%{opacity:0.3;transform:scale(1)}50%{opacity:0.6;transform:scale(1.2)}}
+.map-enemy{position:absolute;z-index:4;pointer-events:none;opacity:0;transition:opacity 0.5s}
+.map-enemy.visible{opacity:0.7}
+.map-enemy-icon{font-size:8px;color:#6688cc;animation:enemyBlink 2s infinite;text-shadow:0 0 4px rgba(68,85,170,0.5)}
+@keyframes enemyBlink{0%,80%,100%{opacity:0.7}90%{opacity:0.2}}
+.map-explosion{position:absolute;width:20px;height:20px;border-radius:50%;z-index:7;pointer-events:none;background:radial-gradient(circle,rgba(255,200,50,0.9),rgba(255,100,0,0.5),transparent);opacity:0;transform:translate(-50%,-50%)}
+.map-explosion.flash{animation:explode 0.6s ease-out forwards}
+@keyframes explode{0%{opacity:1;transform:translate(-50%,-50%) scale(0.3)}30%{opacity:0.9;transform:translate(-50%,-50%) scale(1.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.8)}}
+.river-particle{position:absolute;width:3px;height:1px;background:rgba(74,124,155,0.5);z-index:2;pointer-events:none;border-radius:1px}
+
+/* ===== SCENE PANEL ===== */
+.scene-overlay-panel{position:absolute;inset:0;z-index:15;display:none;background:#1a1a1a}
+.scene-overlay-panel.show{display:block}
+.scene-overlay-panel img{width:100%;height:100%;object-fit:cover}
+.scene-overlay-panel .scene-gradient{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 60%,rgba(0,0,0,0.6) 100%)}
+.scene-toggle{position:absolute;top:12px;right:12px;z-index:25;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(212,168,67,0.4);padding:5px 12px;border-radius:4px;cursor:pointer;font-size:11px;transition:all 0.2s;font-family:'Noto Sans SC',sans-serif}
+.scene-toggle:hover{background:rgba(212,168,67,0.2)}
+
+/* ===== NARRATIVE PANEL ===== */
+.narrative-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:rgba(245,230,200,0.85)}
+.narrative-content{flex:1;padding:28px 32px;overflow-y:auto;line-height:2;font-size:15px;font-family:'Noto Serif SC',serif;color:var(--ink)}
+.narrative-content::-webkit-scrollbar{width:5px}
+.narrative-content::-webkit-scrollbar-thumb{background:var(--parchment-dark);border-radius:3px}
+.narrative-text{margin-bottom:14px;opacity:0;transform:translateY(8px);transition:all 0.5s ease}
+.narrative-text.visible{opacity:1;transform:translateY(0)}
+.narrative-text.speaking{background:rgba(212,168,67,0.1);border-left:3px solid var(--gold);padding-left:12px;border-radius:0 4px 4px 0}
+.narrative-highlight{background:linear-gradient(transparent 60%,rgba(204,51,51,0.15) 60%);padding:0 2px;font-weight:700}
+.narrative-date{color:var(--red-army);font-weight:700;font-size:13px;margin-bottom:8px;letter-spacing:2px}
+.decision-panel{border-top:2px solid var(--parchment-dark);padding:18px 32px;background:linear-gradient(180deg,var(--parchment),var(--parchment-dark));flex-shrink:0}
+.decision-title{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:700;color:var(--red-dark);margin-bottom:12px;letter-spacing:2px}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice-btn{background:var(--parchment);border:2px solid var(--ink-light);padding:12px 18px;text-align:left;cursor:pointer;font-family:'Noto Sans SC',sans-serif;font-size:14px;line-height:1.6;color:var(--ink);transition:all 0.25s;border-radius:4px}
+.choice-btn:hover{border-color:var(--red-army);background:rgba(204,51,51,0.05);transform:translateX(4px)}
+.choice-label{display:inline-block;background:var(--red-dark);color:#fff;width:22px;height:22px;text-align:center;line-height:22px;border-radius:3px;font-size:12px;font-weight:700;margin-right:8px;flex-shrink:0}
+
+/* Narration indicator */
+.narrating-indicator{position:fixed;bottom:16px;right:16px;background:rgba(44,24,16,0.92);color:var(--gold);padding:6px 14px;border-radius:16px;font-size:12px;z-index:60;display:none;align-items:center;gap:6px;border:1px solid rgba(212,168,67,0.4)}
+.narrating-indicator.show{display:flex}
+.narrating-dot{width:6px;height:6px;border-radius:50%;background:var(--red-army);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* Outcome */
+.outcome-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:50;opacity:0;pointer-events:none;transition:opacity 0.5s}
+.outcome-overlay.show{opacity:1;pointer-events:auto}
+.outcome-card{background:var(--parchment);max-width:540px;width:90%;padding:36px;border-radius:8px;text-align:center;font-family:'Noto Serif SC',serif;transform:scale(0.9);transition:transform 0.3s;max-height:80vh;overflow-y:auto}
+.outcome-overlay.show .outcome-card{transform:scale(1)}
+.outcome-icon{font-size:44px;margin-bottom:12px}
+.outcome-title{font-size:20px;font-weight:900;color:var(--red-dark);margin-bottom:14px;letter-spacing:4px}
+.outcome-text{font-size:14px;line-height:2;color:var(--ink-light);margin-bottom:10px;text-align:left}
+.outcome-effect{display:inline-block;background:rgba(139,0,0,0.08);padding:3px 12px;border-radius:4px;font-size:12px;margin:3px;color:var(--red-dark)}
+.outcome-btn{margin-top:18px;background:var(--red-dark);color:var(--gold);border:none;padding:10px 36px;font-size:15px;cursor:pointer;font-family:'Noto Serif SC',serif;letter-spacing:4px;border-radius:4px;transition:all 0.3s}
+.outcome-btn:hover{background:#a00000}
+
+/* ===== TACTICAL MINI-GAME ===== */
+.tactical-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:55;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.tactical-overlay.show{display:flex}
+.tactical-card{background:linear-gradient(135deg,#1a0e06,#2C1810);border:2px solid rgba(212,168,67,0.5);border-radius:12px;width:90%;max-width:520px;padding:28px 32px;text-align:center;color:var(--gold);position:relative;overflow:hidden}
+.tactical-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top center,rgba(204,51,51,0.1),transparent 70%);pointer-events:none}
+.tactical-title{font-family:'Noto Serif SC',serif;font-size:18px;font-weight:900;letter-spacing:4px;margin-bottom:6px;position:relative}
+.tactical-subtitle{font-size:12px;opacity:0.6;margin-bottom:20px;position:relative}
+.tactical-area{position:relative;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:20px}
+
+/* Power bar (timing game) */
+.power-bar-wrap{width:80%;height:30px;background:rgba(255,255,255,0.08);border-radius:15px;position:relative;overflow:hidden;border:1px solid rgba(212,168,67,0.3)}
+.power-bar-fill{height:100%;background:linear-gradient(90deg,#336633,#88cc44,#ffcc00,#ff6600,#cc0000);border-radius:15px;transition:none;width:0%}
+.power-bar-zone{position:absolute;top:0;height:100%;border-left:2px dashed rgba(255,255,255,0.5);border-right:2px dashed rgba(255,255,255,0.5);background:rgba(212,168,67,0.15);z-index:2}
+.power-bar-indicator{position:absolute;top:-8px;width:4px;height:46px;background:#fff;border-radius:2px;box-shadow:0 0 8px rgba(255,255,255,0.6);z-index:3;transition:none}
+.power-bar-label{margin-top:10px;font-size:12px;opacity:0.5}
+.power-tap-btn{margin-top:14px;background:var(--red-army);color:#fff;border:2px solid var(--gold);padding:14px 48px;font-size:18px;font-family:'Noto Serif SC',serif;letter-spacing:6px;cursor:pointer;border-radius:6px;transition:all 0.15s;position:relative}
+.power-tap-btn:active{transform:scale(0.95);background:#a02222}
+
+/* Recon cards */
+.recon-cards{display:flex;gap:14px;justify-content:center}
+.recon-card{width:130px;height:160px;background:linear-gradient(135deg,rgba(44,24,16,0.9),rgba(60,30,15,0.9));border:2px solid rgba(212,168,67,0.3);border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:all 0.25s;position:relative;overflow:hidden}
+.recon-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,0.4)}
+.recon-card:active{transform:scale(0.96)}
+.recon-card-icon{font-size:36px}
+.recon-card-text{font-size:11px;color:rgba(212,168,67,0.8);font-family:'Noto Serif SC',serif}
+.recon-card.selected{border-color:var(--gold);box-shadow:0 0 20px rgba(212,168,67,0.4)}
+.recon-card.correct{border-color:#44aa44;box-shadow:0 0 20px rgba(68,170,68,0.4)}
+.recon-card.wrong{border-color:#cc4444;box-shadow:0 0 20px rgba(204,68,68,0.3)}
+.recon-card.reveal{animation:cardFlip 0.4s ease}
+@keyframes cardFlip{0%{transform:rotateY(0)}50%{transform:rotateY(90deg)}100%{transform:rotateY(0)}}
+
+/* Target click game */
+.target-field{width:100%;height:200px;background:rgba(255,255,255,0.03);border:1px solid rgba(212,168,67,0.2);border-radius:8px;position:relative;overflow:hidden;cursor:crosshair}
+.target-circle{position:absolute;border-radius:50%;transform:translate(-50%,-50%);cursor:pointer;transition:transform 0.1s}
+.target-circle:active{transform:translate(-50%,-50%) scale(0.85)}
+.target-circle.enemy{background:radial-gradient(circle,rgba(68,85,170,0.9),rgba(68,85,170,0.3));border:2px solid #6688cc;box-shadow:0 0 12px rgba(68,85,170,0.5)}
+.target-circle.friendly{background:radial-gradient(circle,rgba(204,51,51,0.9),rgba(204,51,51,0.3));border:2px solid #cc5555;box-shadow:0 0 12px rgba(204,51,51,0.5)}
+.target-circle.hit{animation:targetHit 0.3s forwards}
+@keyframes targetHit{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}50%{opacity:0.5;transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(0.3)}}
+.target-circle.miss-flash{animation:missFlash 0.3s}
+@keyframes missFlash{0%,100%{border-color:#cc5555}50%{border-color:#fff}}
+.target-score{position:absolute;top:8px;right:12px;font-size:14px;font-weight:700;z-index:5}
+.target-hits{color:#44aa44}
+.target-misses{color:#cc4444}
+.target-timer{position:absolute;top:8px;left:12px;font-size:13px;opacity:0.7;z-index:5}
+.target-hint{margin-top:8px;font-size:11px;opacity:0.5}
+
+/* Sequence game (bridge crossing) */
+.bridge-planks{display:flex;gap:8px;justify-content:center;align-items:flex-end;height:120px;margin:10px 0}
+.bridge-plank{width:48px;background:linear-gradient(180deg,#8B6914,#6B4F10);border:1px solid #a07828;border-radius:3px;cursor:pointer;transition:all 0.2s;opacity:0.3;transform:translateY(20px)}
+.bridge-plank.ready{opacity:0.6;transform:translateY(0)}
+.bridge-plank.next{opacity:1;transform:translateY(-4px);box-shadow:0 4px 12px rgba(160,120,40,0.4);animation:plankPulse 1s infinite}
+.bridge-plank.placed{opacity:1;transform:translateY(0);background:linear-gradient(180deg,#aa8820,#8B6914);border-color:#ccaa40}
+.bridge-plank.wrong{background:linear-gradient(180deg,#882222,#661111);border-color:#aa3333;animation:plankShake 0.3s}
+@keyframes plankPulse{0%,100%{box-shadow:0 4px 12px rgba(160,120,40,0.4)}50%{box-shadow:0 4px 20px rgba(212,168,67,0.6)}}
+@keyframes plankShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.bridge-river{width:80%;height:8px;background:linear-gradient(90deg,rgba(74,124,155,0.3),rgba(74,124,155,0.6),rgba(74,124,155,0.3));border-radius:4px;margin:0 auto;position:relative;overflow:hidden}
+.bridge-river::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:riverShimmer 2s infinite}
+@keyframes riverShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.bridge-progress{margin-top:10px;font-size:12px;opacity:0.6}
+
+/* Tactical result */
+.tactical-result{margin-top:16px;padding:14px;background:rgba(0,0,0,0.3);border-radius:8px;border-left:3px solid var(--gold)}
+.tactical-result-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.tactical-result-text{font-size:12px;opacity:0.8;line-height:1.8;text-align:left}
+.tactical-result-effects{margin-top:8px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.tactical-effect{font-size:11px;padding:2px 10px;border-radius:10px;background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.3)}
+.tactical-effect.positive{color:#44aa44;border-color:rgba(68,170,68,0.3)}
+.tactical-effect.negative{color:#cc6644;border-color:rgba(204,102,68,0.3)}
+.tactical-continue-btn{margin-top:16px;background:var(--red-dark);color:var(--gold);border:1px solid var(--gold);padding:8px 28px;font-size:14px;cursor:pointer;font-family:'Noto Serif SC',serif;letter-spacing:3px;border-radius:4px;transition:all 0.2s}
+.tactical-continue-btn:hover{background:#a00000}
+
+/* End Screen */
+#end-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1a0000,#3d0000,#1a0000);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:200;color:var(--gold);font-family:'Noto Serif SC',serif}
+#end-screen.active{display:flex}
+.end-bg{position:absolute;inset:0;background:url('https://www.coze.cn/s/dB0AE89EaDY/') center/cover no-repeat;filter:brightness(0.15) saturate(0.4)}
+.end-content{position:relative;z-index:2;text-align:center}
+.end-title{font-size:44px;font-weight:900;letter-spacing:10px;margin-bottom:16px}
+.end-rank{font-size:24px;margin-bottom:10px}
+.end-score{font-size:16px;opacity:0.8;margin-bottom:24px}
+.end-summary{max-width:480px;text-align:center;font-size:13px;line-height:2;opacity:0.7;margin-bottom:28px}
+.end-btn{background:transparent;color:var(--gold);border:2px solid var(--gold);padding:12px 44px;font-size:16px;cursor:pointer;font-family:'Noto Serif SC',serif;letter-spacing:6px;transition:all 0.3s}
+.end-btn:hover{background:rgba(212,168,67,0.15)}
+
+@media(max-width:900px){
+  .game-main{flex-direction:column}
+  .map-panel{width:100%;height:40%;border-right:none;border-bottom:3px solid rgba(212,168,67,0.5)}
+  .start-title{font-size:40px;letter-spacing:8px}
+  .top-controls .audio-controls{display:none}
+  .tactical-card{padding:20px 16px}
+  .recon-cards{gap:8px}
+  .recon-card{width:100px;height:130px}
+}
+</style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div id="start-screen">
+  <div class="start-bg"></div>
+  <div class="start-content">
+    <div class="start-title">四渡赤水</div>
+    <div class="start-title-en">CROSSING THE CHISHUI</div>
+    <div class="start-quote" data-zh=""四渡赤水才是我的得意之笔。"—— 毛泽东" data-en=""Crossing the Chishui four times is my proudest masterpiece." — Mao Zedong">"四渡赤水才是我的得意之笔。"—— 毛泽东</div>
+    <div class="start-quote-en">"Crossing the Chishui four times is my proudest masterpiece." — Mao Zedong</div>
+    <div class="lang-switch">
+      <button class="lang-btn active" onclick="setLang('zh')">中文</button>
+      <button class="lang-btn" onclick="setLang('en')">English</button>
+    </div>
+    <button class="start-btn" onclick="startGame()" data-zh="进入战场" data-en="Enter Battle">进入战场</button>
+  </div>
+</div>
+
+<!-- GAME CONTAINER -->
+<div id="game-container">
+  <div class="top-bar">
+    <div class="chapter-title" id="chapterTitle">序章</div>
+    <div class="top-controls">
+      <div class="audio-controls">
+        <button class="audio-btn active" id="btnMusic" onclick="toggleMusic()" title="Music">🎵</button>
+        <input type="range" class="vol-slider" id="musicVol" min="0" max="100" value="35" oninput="setMusicVol(this.value)">
+        <button class="audio-btn active" id="btnNarrate" onclick="toggleNarration()" title="Narration">🗣️</button>
+        <input type="range" class="vol-slider" id="narrVol" min="0" max="100" value="80" oninput="setNarrVol(this.value)">
+      </div>
+      <div class="lang-mini">
+        <button class="lang-mini-btn active" id="langZhMini" onclick="setLang('zh')">中</button>
+        <button class="lang-mini-btn" id="langEnMini" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
+    <div class="resources">
+      <div class="resource-item"><span class="resource-icon">⚔️</span><span class="resource-value" id="troopVal">30000</span><span class="resource-label" data-zh="兵力" data-en="Troops">兵力</span></div>
+      <div class="resource-item"><span class="resource-icon">📦</span><span class="resource-value" id="supplyVal">70</span><span class="resource-label" data-zh="补给" data-en="Supply">补给</span></div>
+      <div class="resource-item"><span class="resource-icon">🔥</span><span class="resource-value" id="moraleVal">80</span><span class="resource-label" data-zh="士气" data-en="Morale">士气</span></div>
+    </div>
+  </div>
+  <div class="game-main">
+    <div class="narrative-panel">
+      <div class="narrative-content" id="narrativeContent"></div>
+      <div class="decision-panel" id="decisionPanel"></div>
+    </div>
+  </div>
+</div>
+
+<div class="narrating-indicator" id="narrIndicator"><span class="narrating-dot"></span><span data-zh="朗读中..." data-en="Narrating...">朗读中...</span></div>
+
+<!-- OUTCOME -->
+<div class="outcome-overlay" id="outcomeOverlay">
+  <div class="outcome-card">
+    <div class="outcome-icon" id="outcomeIcon"></div>
+    <div class="outcome-title" id="outcomeTitle"></div>
+    <div class="outcome-text" id="outcomeText"></div>
+    <div id="outcomeEffects"></div>
+    <button class="outcome-btn" onclick="closeOutcome()" data-zh="继续" data-en="Continue">继续</button>
+  </div>
+</div>
+
+<!-- TACTICAL MINI-GAME -->
+<div class="tactical-overlay" id="tacticalOverlay">
+  <div class="tactical-card">
+    <div class="tactical-title" id="tacTitle"></div>
+    <div class="tactical-subtitle" id="tacSubtitle"></div>
+    <div class="tactical-area" id="tacArea"></div>
+    <div id="tacResult"></div>
+  </div>
+</div>
+
+<!-- END -->
+<div id="end-screen">
+  <div class="end-bg"></div>
+  <div class="end-content">
+    <div class="end-title" id="endTitle"></div>
+    <div class="end-rank" id="endRank"></div>
+    <div class="end-score" id="endScore"></div>
+    <div class="end-summary" id="endSummary"></div>
+    <button class="end-btn" onclick="location.reload()" data-zh="再战一回" data-en="Play Again">再战一回</button>
+  </div>
+</div>
+
+<script>
+// ===== LANGUAGE =====
+let lang='zh';
+function setLang(l){
+  lang=l;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.lang-mini-btn').forEach(b=>b.classList.remove('active'));
+  if(l==='zh'){document.querySelectorAll('.lang-btn')[0].classList.add('active');document.getElementById('langZhMini').classList.add('active')}
+  else{document.querySelectorAll('.lang-btn')[1].classList.add('active');document.getElementById('langEnMini').classList.add('active')}
+  document.querySelectorAll('[data-zh]').forEach(el=>{if(el.tagName==='INPUT')return;el.textContent=l==='zh'?el.dataset.zh:el.dataset.en});
+  if(document.getElementById('game-container').classList.contains('active'))showStep();
+}
+function T(zh,en){return lang==='zh'?zh:en}
+
+// ===== SCENE IMAGES =====
+const sceneImages={
+  crossing:'https://www.coze.cn/s/Z_mnPZL_0Mw/',
+  battle:'https://www.coze.cn/s/XO1-klVmpOg/',
+  charge:'https://www.coze.cn/s/eyCzg3RPtUY/',
+  bridge:'https://www.coze.cn/s/dB0AE89EaDY/',
+  map:'https://www.coze.cn/s/6uI9bcNPBAE/',
+};
+
+// ===== MAP NODES =====
+const mapNodes={
+  zunyi:{x:67,y:21,label:{zh:'遵义',en:'Zunyi'},badge:'壹'},
+  loushan:{x:61,y:13,label:{zh:'娄山关',en:'Loushanguan'},badge:'肆'},
+  tucheng:{x:42,y:34,label:{zh:'土城',en:'Tucheng'},badge:'贰'},
+  xuyong:{x:19,y:20,label:{zh:'叙永',en:'Xuyong'},badge:''},
+  zhaxi:{x:9,y:46,label:{zh:'扎西',en:'Zhaxi'},badge:''},
+  gulin:{x:29,y:26,label:{zh:'古蔺',en:'Gulin'},badge:''},
+  maotai:{x:68,y:36,label:{zh:'茅台',en:'Moutai'},badge:'伍'},
+  taiping:{x:50,y:33,label:{zh:'太平渡',en:'Taiping Ferry'},badge:'叁'},
+  erlang:{x:38,y:47,label:{zh:'二郎滩',en:'Erlang Beach'},badge:'陆'},
+  tiziyan:{x:22,y:67,label:{zh:'梯子岩',en:'Tiziyan'},badge:'柒'},
+  guiyang:{x:74,y:55,label:{zh:'贵阳',en:'Guiyang'},badge:''},
+  end:{x:7,y:81,label:{zh:'终点',en:'End'},badge:'捌'},
+};
+
+const routeSegments=[
+  {from:'zunyi',to:'tucheng',cross:1,ch:0},      // 遵义→土城（一渡赤水）
+  {from:'tucheng',to:'xuyong',cross:0,ch:0},      // 土城→叙永
+  {from:'xuyong',to:'zhaxi',cross:0,ch:0},        // 叙永→扎西
+  {from:'zhaxi',to:'gulin',cross:0,ch:1},         // 扎西→古蔺
+  {from:'gulin',to:'taiping',cross:2,ch:1},       // 古蔺→太平渡（二渡赤水）
+  {from:'taiping',to:'zunyi',cross:0,ch:1},       // 太平渡→遵义
+  {from:'zunyi',to:'loushan',cross:0,ch:1},       // 遵义→娄山关
+  {from:'loushan',to:'zunyi',cross:0,ch:2},       // 娄山关→遵义（回师）
+  {from:'zunyi',to:'maotai',cross:3,ch:2},        // 遵义→茅台（三渡赤水）
+  {from:'maotai',to:'erlang',cross:4,ch:3},       // 茅台→二郎滩（四渡赤水）
+  {from:'erlang',to:'tiziyan',cross:0,ch:3},      // 二郎滩→梯子岩
+  {from:'tiziyan',to:'guiyang',cross:0,ch:3},     // 梯子岩→贵阳
+  {from:'guiyang',to:'end',cross:0,ch:3},         // 贵阳→终点
+];
+
+let mapState={current:'zunyi',visited:['zunyi'],traversedSegs:[],sceneVisible:false};
+
+function initMapOverlays(){
+  const overlay=document.getElementById('mapOverlay');if(!overlay)return;overlay.innerHTML='';
+  Object.entries(mapNodes).forEach(([key,node])=>{
+    const div=document.createElement('div');div.className='map-node';div.id='node-'+key;
+    div.style.left=node.x+'%';div.style.top=node.y+'%';
+    div.innerHTML=`<div class="map-node-dot"></div><div class="map-node-label">${T(node.label.zh,node.label.en)}</div>${node.badge?`<div class="map-node-badge">${node.badge}</div>`:''}`;
+    overlay.appendChild(div);
+  });
+  updateMapVisuals();initDynamicElements();initAnimCanvas();
+}
+
+function initRouteLines(){
+  const svg=document.getElementById('mapRoutes');if(!svg)return;svg.innerHTML='';
+  routeSegments.forEach((seg,i)=>{
+    const from=mapNodes[seg.from],to=mapNodes[seg.to];if(!from||!to)return;
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',from.x);line.setAttribute('y1',from.y);
+    line.setAttribute('x2',to.x);line.setAttribute('y2',to.y);
+    line.id='route-'+i;svg.appendChild(line);
+  });
+}
+
+function updateMapVisuals(){
+  Object.entries(mapNodes).forEach(([key])=>{
+    const el=document.getElementById('node-'+key);if(!el)return;
+    el.classList.remove('visited','current','active');
+    if(mapState.visited.includes(key))el.classList.add('visited');
+    if(key===mapState.current)el.classList.add('current');
+  });
+  routeSegments.forEach((seg,i)=>{
+    const line=document.getElementById('route-'+i);if(!line)return;
+    line.classList.remove('traversed','active');
+    if(mapState.traversedSegs.includes(i))line.classList.add('traversed');
+  });
+  const cur=mapNodes[mapState.current];
+  if(cur){const army=document.getElementById('mapArmy');if(army){army.style.left=cur.x+'%';army.style.top=cur.y+'%'}}
+  const lastCross=mapState.traversedSegs.map(i=>routeSegments[i]).filter(s=>s.cross>0);
+  const crossNum=lastCross.length;
+  const ci=document.getElementById('crossingIndicator');if(!ci)return;
+  if(crossNum>0){const last=lastCross[lastCross.length-1];ci.innerHTML=`${T('第','Crossing ')}${last.cross}${T('渡赤水','')}`;ci.style.display='block'}
+  else{ci.innerHTML=T('遵义 · 出发','Zunyi · Departure');ci.style.display='block'}
+  updateDynamicVisibility();
+}
+
+// ===== DYNAMIC MAP ELEMENTS =====
+let animCanvas,animCtx,animFrame;
+let particles=[];
+
+const dynamicConfig={
+  // Chapter 0 (序章遵义会议): step 0-3 纯叙事，无dynamicConfig
+  // Chapter 1 (一渡赤水): step 0 (画面5土城决策), step 1 (画面6杨勇纯叙事)
+  '1-0':{flags:[{x:44,y:32}],camps:[{x:40,y:36}],enemies:[],battle:{x:42,y:30,intensity:2}},
+  '1-1':{flags:[{x:44,y:32}],camps:[{x:40,y:36}],enemies:[],battle:null},
+  // Chapter 2 (二渡赤水): step 0(7扎西决策), step 1(8突围决策), step 2(9贺子珍纯叙事), step 3(10娄山关决策), step 4(11曾希圣纯叙事)
+  '2-0':{flags:[{x:11,y:44}],camps:[{x:13,y:48}],enemies:[],battle:null},
+  '2-1':{flags:[{x:11,y:44}],camps:[{x:13,y:48}],enemies:[],battle:null},
+  '2-3':{flags:[{x:63,y:15}],camps:[{x:59,y:17}],enemies:[],battle:{x:61,y:11,intensity:3}},
+  // Chapter 3 (三渡赤水): step 0(12遵义决策), step 1(13三渡决策)
+  '3-0':{flags:[{x:69,y:22}],camps:[{x:65,y:25}],enemies:[],battle:null},
+  '3-1':{flags:[{x:70,y:38}],camps:[{x:66,y:40}],enemies:[],battle:null},
+  // Chapter 4 (四渡赤水): step 0(14突围决策)
+  '4-0':{flags:[{x:40,y:49}],camps:[{x:36,y:51}],enemies:[],battle:null},
+};
+
+function initDynamicElements(){
+  const c=document.getElementById('dynamicElements');if(!c)return;c.innerHTML='';
+  for(let i=0;i<3;i++){const f=document.createElement('div');f.className='map-flag';f.id='flag-'+i;f.innerHTML='<div class="map-flag-cloth"></div><div class="map-flag-pole"></div>';c.appendChild(f)}
+  for(let i=0;i<4;i++){const e=document.createElement('div');e.className='map-campfire';e.id='camp-'+i;e.innerHTML='<div class="map-campfire-glow"></div><div class="map-campfire-flame"></div>';c.appendChild(e)}
+  for(let i=0;i<4;i++){const e=document.createElement('div');e.className='map-enemy';e.id='enemy-'+i;e.innerHTML='<div class="map-enemy-icon">⚔️</div>';c.appendChild(e)}
+  for(let i=0;i<4;i++){const s=document.createElement('div');s.className='map-smoke';s.id='smoke-'+i;s.style.background=`radial-gradient(circle,rgba(${150+Math.random()*80},${120+Math.random()*60},${80+Math.random()*40},0.6),transparent)`;c.appendChild(s)}
+  const exp=document.createElement('div');exp.className='map-explosion';exp.id='explosion-0';c.appendChild(exp);
+  const style=document.createElement('style');style.textContent='@keyframes riverFlow{0%{opacity:0.5;transform:translateY(0)}100%{opacity:0;transform:translateY(20px)}}';document.head.appendChild(style);
+  for(let i=0;i<8;i++){const r=document.createElement('div');r.className='river-particle';r.id='river-'+i;r.style.left=(28+Math.random()*6)+'%';r.style.top=(Math.random()*100)+'%';r.style.animation=`riverFlow ${3+Math.random()*4}s linear ${Math.random()*3}s infinite`;c.appendChild(r)}
+}
+
+function updateDynamicVisibility(){
+  const key=state.chapter+'-'+state.step;
+  const cfg=dynamicConfig[key];if(!cfg)return;
+  document.querySelectorAll('.map-flag,.map-campfire,.map-enemy,.map-smoke').forEach(e=>e.classList.remove('visible'));
+  (cfg.flags||[]).forEach((f,i)=>{const el=document.getElementById('flag-'+i);if(el){el.style.left=f.x+'%';el.style.top=f.y+'%';el.classList.add('visible')}});
+  (cfg.camps||[]).forEach((c,i)=>{const el=document.getElementById('camp-'+i);if(el){el.style.left=c.x+'%';el.style.top=c.y+'%';el.classList.add('visible')}});
+  (cfg.enemies||[]).forEach((e,i)=>{const el=document.getElementById('enemy-'+i);if(el){el.style.left=e.x+'%';el.style.top=e.y+'%';el.classList.add('visible')}});
+  if(cfg.battle){const b=cfg.battle;for(let i=0;i<Math.min(b.intensity,4);i++){const s=document.getElementById('smoke-'+i);if(s){s.style.left=(b.x-2+Math.random()*4)+'%';s.style.top=(b.y-2+Math.random()*4)+'%';s.classList.add('visible')}}triggerExplosion(b.x,b.y)}
+}
+
+function triggerExplosion(x,y){
+  const el=document.getElementById('explosion-0');if(!el)return;
+  el.style.left=x+'%';el.style.top=y+'%';el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');
+  let count=0;const iv=setInterval(()=>{count++;if(count>5){clearInterval(iv);return}setTimeout(()=>{el.style.left=(x-1+Math.random()*2)+'%';el.style.top=(y-1+Math.random()*2)+'%';el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')},800+Math.random()*600)},1500);
+}
+
+let animRunning=false;
+function initAnimCanvas(){
+  animCanvas=document.getElementById('mapAnimCanvas');if(!animCanvas)return;
+  const rect=animCanvas.parentElement.getBoundingClientRect();
+  animCanvas.width=rect.width||600;animCanvas.height=rect.height||800;
+  animCtx=animCanvas.getContext('2d');particles=[];
+  for(let i=0;i<30;i++){particles.push({x:Math.random()*animCanvas.width,y:Math.random()*animCanvas.height,vx:(Math.random()-0.5)*0.3,vy:-0.1-Math.random()*0.3,size:1+Math.random()*2,alpha:0.1+Math.random()*0.2,color:Math.random()>0.5?'204,51,51':'212,168,67',life:Math.random()*200+100})}
+  if(!animRunning){animRunning=true;animateCanvas()}
+}
+function animateCanvas(){
+  if(!animRunning)return;
+  animCtx.clearRect(0,0,animCanvas.width,animCanvas.height);
+  particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;if(p.life<=0||p.y<0||p.x<0||p.x>animCanvas.width){p.x=Math.random()*animCanvas.width;p.y=animCanvas.height+Math.random()*20;p.life=100+Math.random()*200;p.alpha=0.1+Math.random()*0.2}const fadeRatio=Math.min(1,p.life/30);animCtx.beginPath();animCtx.arc(p.x,p.y,p.size,0,Math.PI*2);animCtx.fillStyle=`rgba(${p.color},${p.alpha*fadeRatio})`;animCtx.fill()});
+  for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<60){animCtx.beginPath();animCtx.moveTo(particles[i].x,particles[i].y);animCtx.lineTo(particles[j].x,particles[j].y);animCtx.strokeStyle=`rgba(212,168,67,${0.05*(1-dist/60)})`;animCtx.lineWidth=0.5;animCtx.stroke()}}}
+  animFrame=requestAnimationFrame(animateCanvas);
+}
+
+function advanceMap(targetKey){
+  if(mapState.current===targetKey)return;
+  // BFS寻路：从当前位置到目标位置，沿路线网走
+  const graph={};
+  routeSegments.forEach((seg,i)=>{if(!graph[seg.from])graph[seg.from]=[];graph[seg.from].push({to:seg.to,idx:i})});
+  const visited=new Set([mapState.current]);
+  const queue=[[mapState.current,[]]];
+  let found=null;
+  while(queue.length>0){
+    const[curr,path]=queue.shift();
+    for(const edge of(graph[curr]||[])){
+      if(edge.to===targetKey){found=[...path,edge.idx];break}
+      if(!visited.has(edge.to)){visited.add(edge.to);queue.push([edge.to,[...path,edge.idx]])}
+    }
+    if(found)break;
+  }
+  if(found){
+    found.forEach((segIdx,i)=>{
+      if(!mapState.traversedSegs.includes(segIdx)){
+        mapState.traversedSegs.push(segIdx);
+        const seg=routeSegments[segIdx];
+        if(!mapState.visited.includes(seg.from))mapState.visited.push(seg.from);
+        const line=document.getElementById('route-'+segIdx);
+        if(line){line.classList.add('active');setTimeout(()=>line.classList.remove('active'),1500)}
+      }
+    });
+  }
+  if(!mapState.visited.includes(targetKey))mapState.visited.push(targetKey);
+  mapState.current=targetKey;updateMapVisuals();
+}
+
+function toggleScene(){
+  mapState.sceneVisible=!mapState.sceneVisible;
+  const sp=document.getElementById('scenePanel');if(sp)sp.classList.toggle('show',mapState.sceneVisible);
+}
+
+// ===== ENHANCED SFX SYSTEM =====
+let audioCtx=null,masterGain=null,bgmAudio=null;
+let musicOn=true,narrOn=true,musicVol=0.35,narrVol=0.8;
+
+function initAudio(){
+  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  masterGain=audioCtx.createGain();masterGain.gain.value=1.0;masterGain.connect(audioCtx.destination);
+  startBGM();
+}
+
+function startBGM(){
+  if(!musicOn)return;
+  if(!bgmAudio){bgmAudio=new Audio('https://www.coze.cn/s/uPojbqpy18M/');bgmAudio.loop=true;bgmAudio.volume=musicVol}
+  bgmAudio.play().catch(()=>{});
+}
+
+function playSFX(type){
+  if(!audioCtx)return;
+  const now=audioCtx.currentTime;
+  function sfxNote(freq,t,dur,vol,type_='triangle'){
+    const o=audioCtx.createOscillator();const g=audioCtx.createGain();
+    o.type=type_;o.frequency.value=freq;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+dur+0.05);
+  }
+  function sfxNoise(t,dur,vol){
+    const bufSize=audioCtx.sampleRate*dur;
+    const buf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);
+    const data=buf.getChannelData(0);for(let i=0;i<bufSize;i++)data[i]=(Math.random()*2-1);
+    const src=audioCtx.createBufferSource();src.buffer=buf;
+    const g=audioCtx.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    const filt=audioCtx.createBiquadFilter();filt.type='bandpass';filt.frequency.value=800;filt.Q.value=1;
+    src.connect(filt);filt.connect(g);g.connect(audioCtx.destination);src.start(t);src.stop(t+dur+0.05);
+  }
+  switch(type){
+    case'click':sfxNote(800,now,0.06,0.06,'sine');sfxNote(1200,now+0.02,0.04,0.04,'sine');break;
+    case'choice':sfxNote(440,now,0.15,0.1);sfxNote(660,now+0.08,0.12,0.08);break;
+    case'victory':[440,554,659,880].forEach((f,i)=>sfxNote(f,now+i*0.18,0.4,0.1));break;
+    case'chapter':[330,392,494,587].forEach((f,i)=>sfxNote(f,now+i*0.22,0.35,0.08));break;
+    case'defeat':{const o=audioCtx.createOscillator();const g=audioCtx.createGain();o.type='sawtooth';o.frequency.setValueAtTime(300,now);o.frequency.exponentialRampToValueAtTime(80,now+0.8);g.gain.setValueAtTime(0.06,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.9);o.connect(g);g.connect(audioCtx.destination);o.start(now);o.stop(now+0.9)}break;
+    case'march':[0,0.3,0.6,1.0,1.3].forEach((t,i)=>sfxNote(80,now+t,0.2,i%3===0?0.12:0.06,'square'));break;
+    case'tap':sfxNote(600,now,0.08,0.07,'sine');sfxNote(900,now+0.03,0.05,0.05,'sine');break;
+    case'perfect':sfxNote(523,now,0.12,0.1);sfxNote(659,now+0.1,0.12,0.1);sfxNote(784,now+0.2,0.18,0.12);break;
+    case'good':sfxNote(440,now,0.1,0.08);sfxNote(554,now+0.1,0.14,0.09);break;
+    case'miss':sfxNote(200,now,0.15,0.06,'sawtooth');sfxNote(150,now+0.08,0.12,0.05,'sawtooth');break;
+    case'target_hit':sfxNote(880,now,0.06,0.08,'sine');sfxNote(1100,now+0.02,0.08,0.06,'sine');break;
+    case'target_miss':sfxNoise(now,0.1,0.04);break;
+    case'plank_ok':sfxNote(440,now,0.1,0.06);sfxNote(554,now+0.05,0.08,0.05);break;
+    case'plank_wrong':sfxNote(200,now,0.2,0.06,'sawtooth');break;
+    case'recon_correct':sfxNote(523,now,0.12,0.08);sfxNote(659,now+0.12,0.12,0.08);sfxNote(784,now+0.24,0.2,0.1);break;
+    case'recon_wrong':sfxNote(300,now,0.15,0.06,'sawtooth');sfxNote(250,now+0.1,0.2,0.05,'sawtooth');break;
+    case'complete':sfxNote(523,now,0.2,0.1);sfxNote(659,now+0.15,0.2,0.1);sfxNote(784,now+0.3,0.2,0.1);sfxNote(1047,now+0.5,0.4,0.12);break;
+    case'crossing':sfxNote(330,now,0.3,0.06);sfxNote(392,now+0.1,0.3,0.06);sfxNoise(now+0.2,0.5,0.03);break;
+    case'drum':sfxNote(80,now,0.15,0.15,'square');sfxNoise(now,0.08,0.06);break;
+  }
+}
+
+function toggleMusic(){musicOn=!musicOn;document.getElementById('btnMusic').classList.toggle('active',musicOn);if(bgmAudio){if(musicOn)bgmAudio.play().catch(()=>{});else bgmAudio.pause()}}
+function setMusicVol(v){musicVol=v/100;if(bgmAudio)bgmAudio.volume=musicVol}
+function toggleNarration(){narrOn=!narrOn;document.getElementById('btnNarrate').classList.toggle('active',narrOn);if(!narrOn)stopNarr()}
+function setNarrVol(v){narrVol=v/100}
+
+// ===== EMOTIONAL TTS =====
+let isNarrating=false;
+function detectEmotion(text){
+  const t=text.toLowerCase();
+  if(/险|惨|败|亡|危|困|损失|牺牲|围|迫|险境|encircled|defeat|loss|danger|trapped/.test(t))return'dire';
+  if(/胜|捷|克|夺|妙|奇|成功|辉煌|振奋|得意|victory|success|brilliant|triumph/.test(t))return'triumph';
+  if(/秘密|悄|暗|潜|幽灵|趁|突|secret|phantom|slip|stealth/.test(t))return'stealth';
+  if(/果断|当机立断|命令|下令|急|迅速|decisive|order|rapid|urgent/.test(t))return'urgent';
+  return'neutral';
+}
+
+function speakEmotional(text,onEnd){
+  if(!narrOn||!('speechSynthesis' in window)){if(onEnd)onEnd();return}
+  speechSynthesis.cancel();
+  const plain=text.replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ');
+  const sentences=plain.split(/(?<=[。！？；\.\!\?;])/g).filter(s=>s.trim());
+  let idx=0;
+  const voices=speechSynthesis.getVoices();
+  const zhVoice=voices.find(v=>v.lang.includes('zh')&&v.localService);
+  function speakNext(){
+    if(idx>=sentences.length||!narrOn){isNarrating=false;document.getElementById('narrIndicator').classList.remove('show');if(onEnd)onEnd();return}
+    const s=sentences[idx].trim();if(!s){idx++;speakNext();return}
+    const u=new SpeechSynthesisUtterance(s);u.lang=lang==='zh'?'zh-CN':'en-US';u.volume=narrVol;
+    const e=detectEmotion(s);
+    switch(e){case'dire':u.rate=0.78;u.pitch=0.85;break;case'triumph':u.rate=0.92;u.pitch=1.15;break;case'stealth':u.rate=0.72;u.pitch=0.9;break;case'urgent':u.rate=1.05;u.pitch=1.1;break;default:u.rate=0.88;u.pitch=1.0}
+    if(lang==='en'){u.rate*=1.05;u.pitch*=0.95}
+    if(zhVoice&&lang==='zh')u.voice=zhVoice;
+    isNarrating=true;document.getElementById('narrIndicator').classList.add('show');
+    u.onend=()=>{idx++;const pause=e==='dire'?500:e==='stealth'?600:e==='triumph'?350:420;setTimeout(speakNext,pause)};
+    u.onerror=()=>{isNarrating=false;document.getElementById('narrIndicator').classList.remove('show');if(onEnd)onEnd()};
+    speechSynthesis.speak(u);
+  }
+  speakNext();
+}
+
+function speakNarrative(texts,elems){
+  if(!narrOn)return;let i=0;
+  function next(){
+    if(i>=texts.length)return;
+    document.querySelectorAll('.narrative-text.speaking').forEach(e=>e.classList.remove('speaking'));
+    if(elems[i])elems[i].classList.add('speaking');
+    speakEmotional(texts[i].replace(/<[^>]*>/g,''),()=>{if(elems[i])elems[i].classList.remove('speaking');i++;if(i<texts.length)setTimeout(next,700)});
+  }
+  next();
+}
+
+function stopNarr(){speechSynthesis.cancel();isNarrating=false;document.getElementById('narrIndicator').classList.remove('show');document.querySelectorAll('.narrative-text.speaking').forEach(e=>e.classList.remove('speaking'))}
+
+// ===== GAME STATE =====
+const state={troops:30000,supply:70,morale:80,chapter:0,step:0,score:0,decisions:[],tacCompleted:[]};
+
+// ===== STATE HISTORY (for undo) =====
+const stateHistory=[];
+
+function saveSnapshot(){
+  stateHistory.push({
+    troops:state.troops,
+    supply:state.supply,
+    morale:state.morale,
+    chapter:state.chapter,
+    step:state.step,
+    score:state.score,
+    decisions:JSON.parse(JSON.stringify(state.decisions)),
+    tacCompleted:[...state.tacCompleted],
+    mapCurrent:mapState.current,
+    mapVisited:[...mapState.visited],
+    mapTraversedSegs:[...mapState.traversedSegs],
+  });
+}
+
+function goBack(){
+  if(stateHistory.length===0)return;
+  // Close any open overlays first
+  document.getElementById('outcomeOverlay').classList.remove('show');
+  document.getElementById('tacticalOverlay').classList.remove('show');
+  // Stop any running tactical animations
+  tacActive=false;tacData.running=false;
+  if(tacAnimId){cancelAnimationFrame(tacAnimId);tacAnimId=null}
+  stopNarr();
+
+  const snap=stateHistory.pop();
+  state.troops=snap.troops;state.supply=snap.supply;state.morale=snap.morale;
+  state.chapter=snap.chapter;state.step=snap.step;state.score=snap.score;
+  state.decisions=snap.decisions;state.tacCompleted=snap.tacCompleted;
+  mapState.current=snap.mapCurrent;mapState.visited=snap.mapVisited;mapState.traversedSegs=snap.mapTraversedSegs;
+
+  playSFX('tap');
+  updateRes();
+  updateMapVisuals();
+  updateBackBtn();
+  showStep();
+}
+
+function goBackFromOutcome(){
+  // Same as goBack, already closes outcome overlay
+  goBack();
+}
+
+function updateBackBtn(){
+  const btn=document.getElementById('backBtn');
+  if(!btn)return;
+  if(stateHistory.length>0)btn.classList.add('show');
+  else btn.classList.remove('show');
+}
+
+// ===== TACTICAL MINI-GAMES =====
+// Tactical events trigger between certain steps
+const tacticalEvents={
+  '1-0':{type:'march', // Chapter 1 step 0 (画面5土城决策后)
+    title:{zh:'⚡ 急行军挑战',en:'⚡ Rapid March Challenge'},
+    subtitle:{zh:'抓住时机，一鼓作气！在力量条到达最佳区域时按下',en:'Seize the moment! Press when the power bar hits the sweet spot'},
+  },
+  '2-1':{type:'recon', // Chapter 2 step 1 (画面8突围决策后)
+    title:{zh:'⚡ 侦察敌情',en:'⚡ Scout Enemy Positions'},
+    subtitle:{zh:'敌军主力藏在哪里？选择侦察方向',en:'Where is the enemy main force? Choose a scout direction'},
+  },
+  '2-3':{type:'target', // Chapter 2 step 3 (画面10娄山关决策后)
+    title:{zh:'⚡ 伏击敌军',en:'⚡ Ambush the Enemy'},
+    subtitle:{zh:'点击敌军目标！注意不要误伤友军',en:'Click enemy targets! Be careful not to hit friendlies'},
+  },
+  '3-1':{type:'bridge', // Chapter 3 step 1 (画面13三渡赤水决策后)
+    title:{zh:'⚡ 抢渡浮桥',en:'⚡ Rush the Pontoon Bridge'},
+    subtitle:{zh:'按正确顺序铺设桥板，抢渡赤水河！',en:'Lay bridge planks in order to cross the Chishui!'},
+  },
+};
+
+let tacActive=false;
+let tacAnimId=null;
+let tacData={};
+
+function shouldTriggerTactical(chapter,step){
+  const key=chapter+'-'+step;
+  return tacticalEvents[key]&&!state.tacCompleted.includes(key);
+}
+
+function showTactical(chapter,step){
+  const key=chapter+'-'+step;
+  const evt=tacticalEvents[key];if(!evt)return;
+  tacActive=true;state.tacCompleted.push(key);
+  playSFX('drum');
+  document.getElementById('tacTitle').textContent=T(evt.title.zh,evt.title.en);
+  document.getElementById('tacSubtitle').textContent=T(evt.subtitle.zh,evt.subtitle.en);
+  document.getElementById('tacResult').innerHTML='';
+  document.getElementById('tacticalOverlay').classList.add('show');
+
+  switch(evt.type){
+    case'march':initMarchGame();break;
+    case'recon':initReconGame();break;
+    case'target':initTargetGame();break;
+    case'bridge':initBridgeGame();break;
+  }
+}
+
+// --- March (Timing Power Bar) ---
+function initMarchGame(){
+  const area=document.getElementById('tacArea');
+  area.innerHTML=`
+    <div class="power-bar-wrap">
+      <div class="power-bar-zone" style="left:38%;width:24%"></div>
+      <div class="power-bar-fill" id="powerFill"></div>
+      <div class="power-bar-indicator" id="powerInd" style="left:0%"></div>
+    </div>
+    <div class="power-bar-label">${T('力量条在金色区域时按下按钮！','Press the button when the bar is in the gold zone!')}</div>
+    <button class="power-tap-btn" id="powerTap" onclick="marchTap()">${T('冲！','Charge!')}</button>
+  `;
+  tacData={dir:1,speed:2.5,pos:0,hits:[],round:0,maxRounds:3,running:true};
+  animatePowerBar();
+}
+
+function animatePowerBar(){
+  if(!tacData.running)return;
+  tacData.pos+=tacData.dir*tacData.speed;
+  if(tacData.pos>=100){tacData.pos=100;tacData.dir=-1}
+  if(tacData.pos<=0){tacData.pos=0;tacData.dir=1}
+  const fill=document.getElementById('powerFill');const ind=document.getElementById('powerInd');
+  if(fill)fill.style.width=tacData.pos+'%';
+  if(ind)ind.style.left=tacData.pos+'%';
+  tacAnimId=requestAnimationFrame(animatePowerBar);
+}
+
+function marchTap(){
+  if(!tacData.running)return;
+  const pos=tacData.pos;
+  // Gold zone: 38-62%
+  const quality=pos>=38&&pos<=62?'perfect':pos>=28&&pos<=72?'good':'miss';
+  tacData.hits.push(quality);
+  tacData.round++;
+  playSFX(quality==='perfect'?'perfect':quality==='good'?'good':'miss');
+
+  if(tacData.round>=tacData.maxRounds){
+    tacData.running=false;if(tacAnimId)cancelAnimationFrame(tacAnimId);
+    finishMarchGame();
+  }else{
+    // Speed up slightly each round
+    tacData.speed+=0.4;tacData.pos=0;tacData.dir=1;
+  }
+}
+
+function finishMarchGame(){
+  const perfects=tacData.hits.filter(h=>h==='perfect').length;
+  const goods=tacData.hits.filter(h=>h==='good').length;
+  const total=perfects*2+goods;
+  let effects,title,text;
+  if(total>=5){effects={troops:500,supply:5,morale:10};title={zh:'行军如风！',en:'Swift as the Wind!'};text={zh:'全军疾行，甩开追兵！士兵们意气风发。',en:'The whole army rushes forward, leaving pursuers behind! Spirits soar.'}}
+  else if(total>=3){effects={troops:0,supply:0,morale:5};title={zh:'稳步前行',en:'Steady Advance'};text={zh:'行军速度尚可，虽未达最佳但仍有效。',en:'March pace is decent — not perfect but effective.'}}
+  else{effects={troops:-500,supply:-3,morale:-5};title={zh:'行军迟缓',en:'Sluggish March'};text={zh:'节奏混乱，行军速度大打折扣，追兵逼近了。',en:'Disorganized rhythm. Pursuers are closing in.'}}
+  showTacticalResult(title,text,effects);
+}
+
+// --- Recon (Choose scout direction) ---
+function initReconGame(){
+  const area=document.getElementById('tacArea');
+  const dirs=[
+    {icon:'🏔️',zh:'东北方向 · 娄山关',en:'Northeast · Loushan Pass',correct:false},
+    {icon:'🌊',zh:'西北方向 · 赤水河畔',en:'Northwest · Chishui Banks',correct:true},
+    {icon:'🌲',zh:'正南方向 · 乌江渡口',en:'South · Wu River Crossing',correct:false},
+  ];
+  // Shuffle
+  for(let i=dirs.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[dirs[i],dirs[j]]=[dirs[j],dirs[i]]}
+  tacData={dirs,chosen:false};
+
+  let html='<div class="recon-cards">';
+  dirs.forEach((d,i)=>{
+    html+=`<div class="recon-card" id="recon${i}" onclick="reconPick(${i})"><div class="recon-card-icon">${d.icon}</div><div class="recon-card-text">${T(d.zh,d.en)}</div></div>`;
+  });
+  html+='</div>';
+  area.innerHTML=html;
+}
+
+function reconPick(idx){
+  if(tacData.chosen)return;tacData.chosen=true;
+  playSFX('tap');
+  const dirs=tacData.dirs;
+  // Reveal all
+  dirs.forEach((d,i)=>{
+    const el=document.getElementById('recon'+i);
+    el.classList.add('reveal');
+    if(i===idx){el.classList.add('selected');el.classList.add(d.correct?'correct':'wrong')}
+    else if(d.correct){el.classList.add('correct')}
+  });
+
+  const correct=dirs[idx].correct;
+  setTimeout(()=>{
+    playSFX(correct?'recon_correct':'recon_wrong');
+    let effects,title,text;
+    if(correct){effects={troops:500,supply:5,morale:8};title={zh:'情报精准！',en:'Intel Spot On!'};text={zh:'侦察兵发现了敌军主力动向，红军成功避开伏击圈。',en:'Scouts spot the enemy main force. The Red Army avoids the ambush.'}}
+    else{effects={troops:-500,supply:-3,morale:-5};title={zh:'情报失误',en:'Intel Failure'};text={zh:'侦察方向不对，敌军动向不明，部队险遭伏击。',en:'Wrong direction. Enemy movements unknown. Close call with an ambush.'}}
+    showTacticalResult(title,text,effects);
+  },800);
+}
+
+// --- Target Click (Ambush game) ---
+function initTargetGame(){
+  const area=document.getElementById('tacArea');
+  area.innerHTML=`
+    <div class="target-field" id="targetField">
+      <div class="target-timer" id="targetTimer">${T('⏱ 8秒','⏱ 8s')}</div>
+      <div class="target-score"><span class="target-hits" id="hitCount">0</span> / <span class="target-misses" id="missCount">0</span></div>
+    </div>
+    <div class="target-hint">${T('🎯 点击蓝色敌军 | ❌ 避免红色友军','🎯 Click blue enemies | ❌ Avoid red friendlies')}</div>
+  `;
+  tacData={hits:0,misses:0,friendlyHits:0,running:true,timeLeft:8,targets:[],spawnTimer:0};
+
+  const field=document.getElementById('targetField');
+  field.onclick=function(e){
+    if(e.target===field){tacData.misses++;playSFX('target_miss');document.getElementById('missCount').textContent=tacData.misses}
+  };
+
+  // Timer
+  const timerIv=setInterval(()=>{
+    if(!tacData.running){clearInterval(timerIv);return}
+    tacData.timeLeft--;
+    const el=document.getElementById('targetTimer');if(el)el.textContent=T('⏱ '+tacData.timeLeft+'秒','⏱ '+tacData.timeLeft+'s');
+    if(tacData.timeLeft<=0){tacData.running=false;clearInterval(timerIv);finishTargetGame()}
+  },1000);
+
+  // Spawn targets
+  spawnTarget();
+  function spawnLoop(){
+    if(!tacData.running)return;
+    spawnTarget();
+    setTimeout(spawnLoop,800+Math.random()*600);
+  }
+  setTimeout(spawnLoop,800);
+}
+
+function spawnTarget(){
+  if(!tacData.running)return;
+  const field=document.getElementById('targetField');if(!field)return;
+  const isEnemy=Math.random()>0.25; // 75% enemy
+  const size=24+Math.random()*16;
+  const x=20+Math.random()*60;const y=15+Math.random()*70;
+  const el=document.createElement('div');
+  el.className='target-circle '+(isEnemy?'enemy':'friendly');
+  el.style.width=size+'px';el.style.height=size+'px';
+  el.style.left=x+'%';el.style.top=y+'%';
+
+  el.onclick=function(e){
+    e.stopPropagation();
+    if(!tacData.running)return;
+    if(isEnemy){tacData.hits++;playSFX('target_hit');document.getElementById('hitCount').textContent=tacData.hits}
+    else{tacData.friendlyHits++;tacData.misses++;playSFX('target_miss');document.getElementById('missCount').textContent=tacData.misses}
+    el.classList.add('hit');
+    setTimeout(()=>el.remove(),300);
+  };
+
+  field.appendChild(el);
+  // Auto-remove after a while
+  setTimeout(()=>{if(el.parentElement)el.remove()},2200);
+}
+
+function finishTargetGame(){
+  const hits=tacData.hits;const friendlyHits=tacData.friendlyHits;
+  let effects,title,text;
+  if(hits>=6&&friendlyHits===0){effects={troops:1000,supply:5,morale:12};title={zh:'伏击完美！',en:'Perfect Ambush!'};text={zh:'敌军措手不及，歼敌一个营！友军毫发无损。',en:'Enemy caught completely off guard! One battalion destroyed. Friendlies unharmed.'}}
+  else if(hits>=4){effects={troops:500,supply:3,morale:5};title={zh:'伏击有效',en:'Effective Ambush'};text={zh:'伏击取得战果，但部分敌军逃脱。',en:'The ambush yields results, though some enemies escape.'}}
+  else{effects={troops:-300,supply:-3,morale:-5};title={zh:'伏击失利',en:'Ambush Fails'};text={zh:'目标太少，敌军发现了我军意图。'+(friendlyHits>0?'更糟糕的是，有误伤友军的情况发生！':''),en:'Too few targets hit. The enemy discovers your intentions.'+(friendlyHits>0?' Worse, friendly fire occurred!':'')}}
+  showTacticalResult(title,text,effects);
+}
+
+// --- Bridge (Sequence planks) ---
+function initBridgeGame(){
+  const area=document.getElementById('tacArea');
+  const count=6;
+  const order=[];for(let i=0;i<count;i++)order.push(i+1);
+  // Shuffle to create the sequence players must follow
+  const sequence=[...order]; // Actually we'll use number labels on planks, player clicks in order 1-6
+  tacData={sequence,count,placed:0,errors:0,running:true};
+
+  let html=`<div class="bridge-planks" id="bridgePlanks">`;
+  for(let i=0;i<count;i++){
+    html+=`<div class="bridge-plank ready next" id="plank${i}" style="height:${40+Math.random()*30}px" onclick="plankTap(${i})">${i+1}</div>`;
+  }
+  html+=`</div><div class="bridge-river"></div><div class="bridge-progress" id="bridgeProgress">${T('按顺序 1→6 点击桥板铺设浮桥','Click planks 1→6 in order to build the bridge')}</div>`;
+  area.innerHTML=html;
+  // Highlight first
+  updatePlankHighlights();
+}
+
+function updatePlankHighlights(){
+  for(let i=0;i<tacData.count;i++){
+    const el=document.getElementById('plank'+i);
+    if(!el)continue;
+    el.classList.remove('next','placed','wrong','ready');
+    if(i<tacData.placed){el.classList.add('placed')}
+    else if(i===tacData.placed){el.classList.add('next');el.classList.add('ready')}
+    else{el.classList.add('ready')}
+  }
+}
+
+function plankTap(idx){
+  if(!tacData.running)return;
+  if(idx===tacData.placed){
+    tacData.placed++;
+    playSFX('plank_ok');
+    updatePlankHighlights();
+    const prog=document.getElementById('bridgeProgress');
+    if(prog)prog.textContent=T(`已铺设 ${tacData.placed}/${tacData.count} 块`,`Planks laid: ${tacData.placed}/${tacData.count}`);
+    if(tacData.placed>=tacData.count){
+      tacData.running=false;
+      setTimeout(()=>finishBridgeGame(),500);
+    }
+  }else{
+    tacData.errors++;
+    playSFX('plank_wrong');
+    const el=document.getElementById('plank'+idx);
+    if(el){el.classList.add('wrong');setTimeout(()=>el.classList.remove('wrong'),300)}
+  }
+}
+
+function finishBridgeGame(){
+  const errors=tacData.errors;
+  let effects,title,text;
+  if(errors===0){effects={troops:800,supply:8,morale:15};title={zh:'浮桥速成！',en:'Bridge Built in Record Time!'};text={zh:'桥板一块不错，全军迅速渡河，追兵望河兴叹！',en:'Not a single mistake. The entire army crosses swiftly. Pursuers can only watch!'}}
+  else if(errors<=2){effects={troops:200,supply:3,morale:5};title={zh:'浮桥建成',en:'Bridge Completed'};text={zh:'浮桥虽然搭了几次错，但总算建成。部分辎重因延误被迫丢弃。',en:'A few wrong planks, but the bridge holds. Some supplies lost to delay.'}}
+  else{effects={troops:-800,supply:-8,morale:-8};title={zh:'渡河混乱',en:'Chaotic Crossing'};text={zh:'搭桥错误太多，渡河时间大增。敌军炮火已至，部队损失不小。',en:'Too many mistakes. Crossing takes far too long. Enemy fire arrives — heavy losses.'}}
+  showTacticalResult(title,text,effects);
+}
+
+// --- Tactical Result ---
+function showTacticalResult(title,text,effects){
+  playSFX('complete');
+  const resultDiv=document.getElementById('tacResult');
+  let html=`<div class="tactical-result"><div class="tactical-result-title">${T(title.zh,title.en)}</div><div class="tactical-result-text">${T(text.zh,text.en)}</div><div class="tactical-result-effects">`;
+  if(effects.troops){const v=effects.troops;html+=`<span class="tactical-effect ${v>0?'positive':'negative'}">⚔️ ${v>0?'+':''}${v}</span>`}
+  if(effects.supply){const v=effects.supply;html+=`<span class="tactical-effect ${v>0?'positive':'negative'}">📦 ${v>0?'+':''}${v}</span>`}
+  if(effects.morale){const v=effects.morale;html+=`<span class="tactical-effect ${v>0?'positive':'negative'}">🔥 ${v>0?'+':''}${v}</span>`}
+  html+=`</div></div><button class="tactical-continue-btn" onclick="closeTactical()">${T('继续','Continue')}</button>`;
+  resultDiv.innerHTML=html;
+
+  // Apply effects
+  if(effects.troops)state.troops=Math.max(5000,state.troops+effects.troops);
+  if(effects.supply)state.supply=Math.max(10,Math.min(100,state.supply+effects.supply));
+  if(effects.morale)state.morale=Math.max(10,Math.min(100,state.morale+effects.morale));
+  updateRes();
+}
+
+function closeTactical(){
+  tacActive=false;
+  document.getElementById('tacticalOverlay').classList.remove('show');
+  // Continue to next step
+  state.step++;
+  const ch=chapters[state.chapter];
+  if(state.step>=ch.steps.length)nextChapter();else showStep();
+}
+
+// ===== CHAPTERS =====
+// 新剧本结构：每个画面是独立step，纯叙事无decision字段，有决策的才有decision字段
+const chapters=[
+  // ===== Chapter 0: 序章 · 遵义会议 =====
+  {
+    title:{zh:'序章 · 遵义会议',en:'Prologue · Zunyi Conference'},
+    sceneImg:'crossing',
+    steps:[
+      // 画面1 - 纯叙事（新增节点0）
+      {
+        date:{zh:'1935年1月 · 遵义',en:'January 1935 · Zunyi'},
+        mapTarget:'zunyi',
+        text:{
+          zh:['1935年1月，贵州遵义。','湘江一役，中央红军从8.6万人锐减至3万余人，鲜血染红了江水。','博古、李德的"左"倾教条主义领导已把红军带到了悬崖边上，第五次反"围剿"失败的惨痛教训让每一个红军指挥员都感到切肤之痛。','通道会议、黎平会议、猴场会议上一路争论不休，如今，利用这宝贵的休整间隙，<span class="narrative-highlight">中共中央政治局扩大会议——遵义会议——终于在这座黔北小城的柏辉章公馆二楼上召开了。</span>','一场严肃而深刻的路线之争，即将完全摆到桌面上来。'],
+          en:['January 1935, Zunyi, Guizhou.','At the Xiang River, the Central Red Army was slashed from 86,000 to barely 30,000. Blood dyed the river red.','The dogmatic leadership of Bo Gu and Otto Braun had brought the Red Army to the edge of the cliff. The bitter lesson of the Fifth Anti-Encirclement failure seared every commander\'s heart.','Endless debates at the Tongdao, Liping, and Houchang conferences led nowhere. Now, in this precious lull, <span class="narrative-highlight">the Enlarged Politburo Conference — the Zunyi Conference — has finally convened on the second floor of the Bai Huizhang Residence.</span>','A serious and profound debate over the line is about to be laid fully on the table.']
+        }
+      },
+      // 画面2 - 纯叙事
+      {
+        date:{zh:'1935年1月 · 遵义',en:'January 1935 · Zunyi'},
+        mapTarget:'zunyi',
+        text:{
+          zh:['遵义会议刚闭幕，中央红军士气高涨，计划北渡长江与红四方面军会合。','28日拂晓，红军在土城青杠坡与川军遭遇，因情报失误——将"旅"误判为"团"——敌军实际兵力超1万人，远超预估的6000人。','激战至傍晚，<span class="narrative-highlight">红军伤亡近3000人，干部团损失惨重。</span>','此时，调整战略方向成为摆在中央红军领导层面前刻不容缓的议题。'],
+          en:['The Zunyi Conference has just concluded. Morale soars; the army plans to cross the Yangtze north and join the Fourth Front Army.','At dawn on the 28th, the Red Army encounters Sichuan forces at Qinggangpo near Tucheng. An intelligence failure — mistaking a "brigade" for a "regiment" — means the enemy outnumbers estimates: over 10,000 vs. the expected 6,000.','By dusk, <span class="narrative-highlight">Red Army casualties near 3,000. The Cadre Regiment is badly mauled.</span>','Adjusting strategic direction is now an urgent imperative for the leadership.']
+        }
+      },
+      // 画面3 - 纯叙事
+      {
+        date:{zh:'1935年1月 · 遵义',en:'January 1935 · Zunyi'},
+        mapTarget:'zunyi',
+        text:{
+          zh:['会议进入第二天，博古的主报告刚为自己辩护完毕，张闻天的"反报告"直指要害，周恩来的副报告实事求是地承认了错误。','<span class="narrative-highlight">就在这时，你——毛泽东——站了起来。"我来说几句。"整个会场安静下来。</span>','你点名批评了博古、李德，指责他们无视红军打运动战的传统策略："路是要用脚走的，人是要吃饭的。只知道纸上谈兵，不考虑战士要走路，也要吃饭，也要睡觉；也不问走的是山地、平原还是河道，只知道在地图上一画，限定时间打，当然打不好。"','你逐条剖析第五次反"围剿"失败的真正原因：第一阶段进攻中的冒险主义，第二阶段防御中的保守主义，第三阶段退却中的逃跑主义。这归根到底是军事策略和指挥的问题！你尖锐地批评李德"包办了军事委员会的一切工作"——这是教条主义在指挥红军走向绝路。','这番话掷地有声，像一把刀剥开了层层迷雾。','凯丰却突然站起来发难："毛泽东打仗的方法一点都不高明，就是照着《三国演义》和《孙子兵法》打仗的！"','你毫不退让，反唇相讥："你没读过《孙子兵法》怎么知道我的战术是从那里来的？打仗之事，敌我形势那么紧张，怎能照书本去打！"','素来谦逊稳重的朱德，这次也声色俱厉地站了起来："有什么本钱，就打什么仗，没有本钱，打什么仗？<span class="narrative-highlight">如果继续这样的领导，我们就不能再跟着走下去！</span>"','王稼祥在躺椅里抬起身体，一只手按着腹部的伤口："我同意毛泽东的发言。必须改变错误的领导。"','周恩来一字一句地说："只有改变错误的领导，红军才有希望。"他全力推举了你。','会议决议形成：<span class="narrative-highlight">你进入了政治局常委，取消了"三人团"，周恩来、朱德负责军事指挥。</span>'],
+          en:['Day two of the conference. Bo Gu\'s report has just finished defending himself. Zhang Wentian\'s "counter-report" strikes at the heart of the matter. Zhou Enlai\'s supplementary report honestly admits mistakes.','<span class="narrative-highlight">At this moment, you — Mao Zedong — rise. "Let me say a few words." The entire room falls silent.</span>','You name and criticize Bo Gu and Braun, accusing them of ignoring the Red Army\'s mobile warfare tradition: "Roads are walked with feet, people need to eat. All they know is armchair strategy — never considering that soldiers must walk, eat, and sleep; never asking whether the terrain is mountain, plain, or river. They just draw lines on a map and set deadlines — of course they can\'t fight well."','You dissect the true causes of the Fifth Anti-Encirclement failure: adventurism in the offensive phase, conservatism in defense, flightism in retreat. The root is military strategy and command! You sharply criticize Braun for "monopolizing all work of the Military Commission" — dogmatism leading the Red Army to ruin.','These words ring out like a blade cutting through fog.','Kai Feng suddenly attacks: "Mao\'s methods are unimpressive — he fights by the Romance of the Three Kingdoms and The Art of War!"','You retort without yielding: "How do you know my tactics come from there if you haven\'t even read The Art of War? In battle, the situation is so tense — how can you fight by the book?"','The ever-modest Zhu De rises with rare fury: "Fight with what you have. If you don\'t have the means, what battle are you fighting? <span class="narrative-highlight">If this leadership continues, we cannot follow any further!</span>"','Wang Jiaxiang lifts himself from his stretcher, one hand pressing his abdominal wound: "I agree with Comrade Mao. We must change the erroneous leadership."','Zhou Enlai states word by word: "Only by changing the erroneous leadership can the Red Army have hope." He fully endorses you.','The resolution is formed: <span class="narrative-highlight">You join the Politburo Standing Committee. The "Three-Man Group" is abolished. Zhou Enlai and Zhu De take military command.</span>']
+        }
+      },
+      // 画面4 - 纯叙事（转场）
+      {
+        date:{zh:'1935年1月 · 遵义',en:'January 1935 · Zunyi'},
+        mapTarget:'zunyi',
+        text:{
+          zh:['走出柏公馆，已是深夜。黔北的夜空罕见地清明。周恩来跟在你身后停下了脚步："毛主席，这个会……终于开完了。"','你深深吸了一口冷冽的寒气，没有回头，望着远处的山峦轮廓：<span class="narrative-highlight">"还没有。真正的仗还在赤水河边上等着我们呢。"</span>','话音未落，历史的镜头从柏公馆的烛火前缓缓拉开，越过黔北的群山，落在赤水河畔。','你睁开眼——已经站在了指挥部里，看着地图上密密麻麻的敌军标记，听着窗外隐约传来的风声与远处的零星枪响。三万将士的目光，都落在你身上。','<span class="narrative-highlight">眼前，战局已铺开；身后，再无退路！</span>'],
+          en:['You step out of the Bai Residence. It is already deep into the night. The Guizhou sky is unusually clear. Zhou Enlai stops behind you: "Chairman Mao, the conference... is finally over."','You inhale the biting cold air deeply, not turning back, gazing at the distant mountain silhouette: <span class="narrative-highlight">"Not yet. The real battle awaits us by the Chishui River."</span>','Before the words fade, the lens of history slowly pulls back from the candlelit conference room, past the mountains of northern Guizhou, settling on the banks of the Chishui.','You open your eyes — you are already standing in the command post, studying the dense enemy markers on the map, hearing the wind and distant gunfire outside. Thirty thousand soldiers\' eyes are upon you.','<span class="narrative-highlight">Before you, the battlefield is laid out; behind you, there is no retreat!</span>']
+        }
+      },
+    ]
+  },
+  // ===== Chapter 1: 一渡赤水 =====
+  {
+    title:{zh:'第一章 · 一渡赤水',en:'Chapter 1 · First Crossing'},
+    sceneImg:'crossing',
+    steps:[
+      // 画面5 - 叙事+决策
+      {
+        date:{zh:'1935年1月29日 · 土城',en:'January 29, 1935 · Tucheng'},
+        mapTarget:'tucheng',
+        text:{
+          zh:['冬夜湿冷，赤水河畔寒风呼啸，枪炮声在山间此起彼伏。','你身处土城前线临时指挥帐内，地面还带着炮火的震颤，一名浑身硝烟、脸上沾着尘土的传令兵踉跄闯入，大口喘气，急促汇报。','<span class="narrative-highlight">"指挥员！紧急战报！土城正面，郭勋祺部攻势越来越猛！川军援军，正在快速包抄我军后路！东岸地势狭窄，大军挤作一团，再拖下去……就要被合围了！"</span>','话音未落，红五军团指挥官快步上前，语气凝重紧迫。','<span class="narrative-highlight">"指挥员，我部董军团长已率部死守阻击，战士伤亡持续增加！赤水河水深湍急，仅少数河段可搭建浮桥，必须立刻定下全军突围方向！"</span>'],
+          en:['A freezing winter night. The Chishui River howls with cold wind; gunfire echoes through the mountains.','Inside the frontline command tent at Tucheng, the ground still trembles from artillery. A messenger, covered in soot and dust, stumbles in, gasping for breath.','<span class="narrative-highlight">"Commander! Urgent report! Guo Xunqi\'s forces press harder on the Tucheng front! Sichuan reinforcements are rapidly flanking our rear! The east bank is narrow — the army is bunched up. If we delay... we\'ll be encircled!"</span>','Before the words land, the Red Fifth Army Group commander steps forward urgently.','<span class="narrative-highlight">"Commander, Comrade Dong is holding the blocking position, but casualties mount! The Chishui is deep and swift — only a few sections can support pontoon bridges. We must decide the breakout direction NOW!"</span>']
+        },
+        decision:{
+          title:{zh:'⚡ 土城僵局：如何破局？',en:'⚡ Stalemate at Tucheng: How to Break Through?'},
+          choices:[
+            {label:'A',text:{zh:'集中兵力，正面强攻，硬突破土城正面敌军防线',en:'Concentrate forces, frontal assault to break through'},
+              outcome:{icon:'⚠️',title:{zh:'强攻受挫',en:'Assault Repulsed'},text:{zh:'川军郭勋祺部为精锐主力，阵地稳固、火力凶猛，红军正面冲锋伤亡惨重，久攻不下，敌军援军持续逼近，战场损耗加剧。',en:'Guo Xunqi\'s elite Sichuan forces hold firm with fierce firepower. Frontal charges result in heavy casualties. Reinforcements keep arriving — losses mount.'},effects:{troops:-6500,supply:-25,morale:-30},score:5,mapNext:'tucheng'}},
+            {label:'B',text:{zh:'架设浮桥，全军西渡赤水，向川南机动突围',en:'Build pontoon bridges, cross the Chishui west, break out toward southern Sichuan'},
+              outcome:{icon:'🎯',title:{zh:'果断转身',en:'Decisive Retreat'},text:{zh:'周恩来连夜指挥工兵，在浑溪口、蔡家沱搭建浮桥；董振堂率红五军团死守阻击。1月29日拂晓，全军有序西渡赤水，晌午前主力全部渡河；渡河后焚毁浮桥、阻断追兵。<span class="narrative-highlight">一渡赤水成功突围！</span>',en:'Zhou Enlai directs engineers overnight to build bridges at Hunxikou and Caijiatuo. Dong Zhentang\'s Fifth Army Group holds the rear. At dawn on January 29, the entire army crosses west in good order. Bridges burned behind them. <span class="narrative-highlight">First Crossing — successful breakout!</span>'},effects:{troops:-280,supply:10,morale:25},score:20,mapNext:'zhaxi'}},
+            {label:'C',text:{zh:'向南迂回，沿赤水河南岸山地绕行突围',en:'Southward detour along the mountainous south bank'},
+              outcome:{icon:'⚔️',title:{zh:'迂回失误',en:'Detour Misfire'},text:{zh:'南岸山地地形崎岖、行军缓慢，敌军预判我军动向提前布防，沿途遭遇多股敌军袭扰，连续机动造成大量非战斗减员。',en:'Rugged southern terrain slows the march. The enemy anticipates the move and sets ambushes. Continuous maneuver causes heavy non-combat attrition.'},effects:{troops:-5200,supply:-20,morale:-22},score:5,mapNext:'tucheng'}},
+          ]
+        }
+      },
+      // 画面6 - 支线：杨勇（纯叙事）
+      {
+        date:{zh:'1935年1月28日 · 青杠坡',en:'January 28, 1935 · Qinggangpo'},
+        mapTarget:'zhaxi',
+        text:{
+          zh:['21岁的杨勇，在土城青杠坡的阵地上，经历了他长征路上最惨烈的一战。','1935年1月28日拂晓，青杠坡战斗打响。敌军并未如红军所料进入伏击圈，而是从枫村坝翻山占领了营棚顶高地，红军只能仰攻。','时任红三军团第4师第10团政治委员的杨勇，率部向敌人发起一轮又一轮的进攻。','<span class="narrative-highlight">激战中，一发子弹击中他的右腮，从嘴唇穿出，六颗牙齿被打落，鲜血瞬间染红了军装。</span>','身负重伤，他仍然不下火线。说不了话，他就用笔来写作战命令，直到失血过多，昏倒在阵地上。','当天黄昏，军委命令撤出战斗。1月29日凌晨，中央红军从土城、元厚场西渡赤水河。','多年后，当战友问他当时疼不疼，他只是笑着说：<span class="narrative-highlight">"疼哪顾得上，只想着多杀几个敌人，给主力争取时间。"</span>','杨勇脸上的伤疤，成了他用命拼出来的那道生路。'],
+          en:['At twenty-one, Yang Yong fought the most brutal battle of his Long March at Qinggangpo near Tucheng.','Dawn, January 28, 1935. The battle begins. Instead of falling into the ambush, the enemy scales Yingpengding from Fengcunba, forcing the Red Army to attack uphill.','As political commissar of the 10th Regiment, 4th Division, Third Army Group, Yang Yong leads charge after charge.','<span class="narrative-highlight">A bullet tears through his right cheek and out through his lips. Six teeth are shot out. Blood instantly soaks his uniform.</span>','Critically wounded, he refuses to leave the line. Unable to speak, he writes combat orders with a pen — until blood loss claims him and he collapses on the position.','At dusk, the Military Commission orders withdrawal. Before dawn on January 29, the Central Red Army crosses the Chishui west at Tucheng and Yuanhouchang.','Years later, when comrades ask if it hurt, he only smiles: <span class="narrative-highlight">"Who had time for pain? I only wanted to kill more enemies and buy time for the main force."</span>','The scar on Yang Yong\'s face became the path of survival he fought for with his life.']
+        }
+      },
+    ]
+  },
+  // ===== Chapter 2: 二渡赤水 · 回马枪 =====
+  {
+    title:{zh:'第二章 · 二渡赤水 · 回马枪',en:'Chapter 2 · Second Crossing · Counter-Strike'},
+    sceneImg:'battle',
+    steps:[
+      // 画面7 - 叙事+决策
+      {
+        date:{zh:'1935年2月初 · 扎西',en:'Early February 1935 · Zhaxi'},
+        mapTarget:'zhaxi',
+        text:{
+          zh:['一渡赤水后，中央红军向西进驻川滇黔交界的扎西地区短暂休整。','山间阴冷潮湿的水气裹挟着每个战士的身体，扎西镇江西会馆的临时指挥所内寒风刺骨，远处敌军逼近的消息接连传来。','<span class="narrative-highlight">蒋介石调集数十万敌军从北、西、南三面快速合围，围剿包围圈持续收紧。</span>','部队历经土城战斗、长途行军，存在机关臃肿、基层连队缺员、重装备拖累行军的问题，整体机动能力、作战效率受限。','一名满脸疲惫的参谋快步闯入帐中，语速急促：','<span class="narrative-highlight">"指挥员！紧急军情！外围侦查发现，川军、滇军、中央军，正三面压向扎西！包围圈越收越紧！目前部队机关人员冗杂，连队缺员严重，大批重装备拖累行军，再这样下去，根本跑不过敌军追兵！"</span>','红三军团前线指挥员一掀帐帘，声音沉稳却带着急迫：','<span class="narrative-highlight">"指挥员，眼下局势紧迫，是维持现有编制、还是精简缩编、或是调整人员配置，我们必须立刻定下方案，不然就要来不及了！"</span>'],
+          en:['After the First Crossing, the Central Red Army moves west to Zhaxi at the junction of Sichuan, Yunnan, and Guizhou for a brief rest.','Cold damp mountain air clings to every soldier. Inside the Jiangxi Guild Hall at Zhaxi, the temporary command post is freezing. Reports of approaching enemy forces keep coming.','<span class="narrative-highlight">Chiang masses hundreds of thousands from north, west, and south. The encirclement tightens by the hour.</span>','After Tucheng and long marches, the army is bloated with headquarters staff, under-strength at the company level, and weighed down by heavy equipment. Mobility and combat efficiency are severely limited.','A exhausted staff officer rushes in, speaking fast:','<span class="narrative-highlight">"Commander! Urgent intelligence! Sichuan, Yunnan, and Central Army forces closing in from three sides! The noose is tightening! Our headquarters are overstaffed, companies under-strength, heavy equipment slowing us down — we can\'t outrun the pursuers at this rate!"</span>','The Third Army Group front commander pushes through the tent flap, calm but urgent:','<span class="narrative-highlight">"Commander, the situation is critical. Maintain the current structure, reorganize and streamline, or adjust personnel — we must decide now, or it\'ll be too late!"</span>']
+        },
+        decision:{
+          title:{zh:'⚡ 扎西整编：如何精简？',en:'⚡ Zhaxi Reorganization: How to Restructure?'},
+          choices:[
+            {label:'A',text:{zh:'维持现有编制，不做大规模调整，就地坚守休整',en:'Maintain current structure, no major adjustments, hold and rest'},
+              outcome:{icon:'⚠️',title:{zh:'臃肿拖累',en:'Cumbersome Burden'},text:{zh:'保留臃肿的机关编制，虽然稳定了人心，但非战斗人员过多，严重拖累行军速度。',en:'Preserving the bloated structure stabilizes morale but overstretches the force. Too many non-combatants severely slow march pace.'},effects:{troops:-4800,supply:-25,morale:-28},score:5,mapNext:'zhaxi'}},
+            {label:'B',text:{zh:'精简缩编、轻装整编，充实基层作战连队',en:'Streamline and reorganize, lighten the load, strengthen front-line companies'},
+              outcome:{icon:'🎯',title:{zh:'轻装上阵',en:'Light and Agile'},text:{zh:'遵照扎西会议部署，5天内完成整编：将30个团缩编为17个团，后勤人员充实基层连队；舍弃笨重辎重、精简重装备；张宗逊、彭雪枫等干部降职任职，践行<span class="narrative-highlight">"师长当团长，团长当营长，官可以降，仗不能输！"</span>整编后部队轻装灵活，基层战力显著提升。',en:'Following the Zhaxi Conference plan, reorganization completes in 5 days: 30 regiments reduced to 17, logistics personnel fill front-line companies; heavy baggage discarded; officers like Zhang Zongxun and Peng Xuefeng accept demotions — <span class="narrative-highlight">"Division commanders become regiment commanders, regiment commanders become battalion commanders. Rank can be lowered, but battles cannot be lost!"</span> The reorganized force is light, agile, and combat-ready.'},effects:{troops:-1200,supply:20,morale:30},score:20,mapNext:'zhaxi'}},
+            {label:'C',text:{zh:'扩充机关编制，收拢散兵、保留重装备，强化后方保障',en:'Expand headquarters, gather stragglers, keep heavy equipment, strengthen rear support'},
+              outcome:{icon:'❌',title:{zh:'头重脚轻',en:'Top-Heavy'},text:{zh:'增设机关部门，层层叠叠。结果是机关越来越庞大，一线战斗兵越来越少。',en:'More departments mean more bureaucracy. Headquarters grows bloated while front-line troops shrink.'},effects:{troops:-5500,supply:-30,morale:-32},score:0,mapNext:'zhaxi'}},
+          ]
+        }
+      },
+      // 画面8 - 叙事+决策
+      {
+        date:{zh:'1935年2月中旬 · 扎西',en:'Mid-February 1935 · Zhaxi'},
+        mapTarget:'zhaxi',
+        text:{
+          zh:['夜色笼罩，扎西山间临时指挥所，油灯摇曳、寒风穿帐。你正端坐于指挥部内研判局势，一名情报员快步冲入帐中，喘着粗气、神情紧绷，呈上最新破译的敌军密电与前线侦查报告。','<span class="narrative-highlight">"报告指挥员！急电——军委二局截获情报！川军、中央军，正全速压向扎西！三面包围圈，越收越紧！侦查探明……黔北遵义、桐梓，守军薄弱！敌军主力，全钉死在川南、滇北！"</span>','情报汇报完毕，身旁前线指挥官随即上前，语速急促。','<span class="narrative-highlight">"指挥员，我军连日行军作战，粮草弹药耗损极快，撑不了多久！我们得马上定好突围方向了！"</span>'],
+          en:['Night falls over Zhaxi. Inside the temporary command post, oil lamps flicker and cold wind cuts through the tent. You sit studying the situation when an intelligence officer bursts in, breathless and tense, bearing the latest decrypted enemy messages and front-line scout reports.','<span class="narrative-highlight">"Commander! Urgent — Second Bureau intercepts enemy communications! Sichuan and Central Army forces closing fast! Three-sided encirclement tightening! Scouts confirm... northern Guizhou — Zunyi, Tongzi — weakly garrisoned! The enemy main force is pinned down in southern Sichuan and northern Yunnan!"</span>','As the report ends, a frontline commander steps forward urgently.','<span class="narrative-highlight">"Commander, we\'ve been marching and fighting nonstop. Ammunition and supplies are running out fast. We can\'t hold on much longer! We must decide the breakout direction immediately!"</span>']
+        },
+        decision:{
+          title:{zh:'⚡ 突围方向：向何处去？',en:'⚡ Direction: Where to Go?'},
+          choices:[
+            {label:'A',text:{zh:'继续西进滇北，向滇北山区转移', en:'Continue west into northern Yunnan mountains'},
+              outcome:{icon:'⚔️',title:{zh:'西进受阻',en:'Westward Blocked'},text:{zh:'进入云南，但滇军龙云早有准备，沿途设防。红军在崇山峻岭中艰难跋涉，补给困难。',en:'Entering Yunnan, but Long Yun is prepared. Defenses line the route. The army struggles through mountains with poor supplies.'},effects:{troops:-5000,supply:-20,morale:-25},score:5,mapNext:'gulin'}},
+            {label:'B',text:{zh:'回师东返，二渡赤水，向黔北方向进军', en:'Turn back east, second crossing of the Chishui, advance toward northern Guizhou'},
+              outcome:{icon:'🎯',title:{zh:'回马枪！',en:'Counter-Strike!'},text:{zh:'红军抓住敌军主力集中川南、黔北防御空虚的战机，1935年2月18—21日从太平渡、二郎滩、九溪口二渡赤水；<span class="narrative-highlight">太平渡顺利渡河，二郎滩激战击溃黔军2个团、俘敌500余人，</span>本次仅渡河作战我方仅有少量伤亡，成功跳出敌军包围圈。',en:'Seizing the opportunity of enemy main forces concentrated in southern Sichuan and northern Guizhou left undefended, February 18-21, 1935, the Red Army crosses the Chishui a second time at Taipingdu, Erlangtan, and Jiuxikou. <span class="narrative-highlight">Smooth crossing at Taipingdu; fierce fighting at Erlangtan routs two Guizhou regiments, capturing over 500.</span> Only light casualties on our side — the army breaks the encirclement.'},effects:{troops:-30,supply:15,morale:20},score:25,mapNext:'taiping'}},
+            {label:'C',text:{zh:'就地驻守扎西，依托现有阵地与敌军周旋', en:'Hold position at Zhaxi, use existing defenses to contend with the enemy'},
+              outcome:{icon:'❌',title:{zh:'坐以待毙',en:'Waiting for Doom'},text:{zh:'敌军持续收紧包围圈，扎西无天然险要屏障，部队被动防御持续消耗。三面敌军合围压迫，扎西坚守已无可能。',en:'Enemy forces tighten the encirclement. Zhaxi has no natural barriers. Passive defense bleeds the army dry. With three enemy columns closing in, holding Zhaxi becomes impossible.'},effects:{troops:-6000,supply:-25,morale:-35},score:0,mapNext:'zhaxi'}},
+          ]
+        }
+      },
+      // 画面9 - 支线：贺子珍分娩（纯叙事）
+      {
+        date:{zh:'1935年2月 · 贵州某地',en:'February 1935 · Somewhere in Guizhou'},
+        mapTarget:'taiping',
+        text:{
+          zh:['1935年2月，中央红军回师东进，二渡赤水在即。队伍行至四川古蔺白沙场附近的长榜上村，贺子珍临产了。','天色已晚，几名女红军搀扶着她在一处农家茅屋停下。屋内没有床，没有门，四面透风，正值正月，寒风刺骨。','战友们手忙脚乱地铺上担架，干部休养连医务室主任孙仪之和医生李治为她接生。<span class="narrative-highlight">婴儿的啼哭声划破了寂静——是个女婴。</span>','贺子珍从贴身衣袋里掏出仅有的四块银圆，脱下身上的茄色外套，把孩子包好。','董必武匆匆写下一张纸条：<span class="narrative-highlight">"老乡：我们是穷人的队伍，正在行军中，有女同志临产了。小孩生下后，拜托你们抚养。拜托！拜托！"</span>孩子被交给了房东张二婆。','孩子被抱走的那一刻，贺子珍把脸转向墙壁，泪水无声滑落。<span class="narrative-highlight">这是她第四次骨肉分离。</span>','产后第二天，部队就要开拔。没有人给她休养的时间，她咬着牙，拖着虚弱至极的身体，爬上了担架，继续随军前行。'],
+          en:['February 1935. The Red Army turns east for the Second Crossing. Near Changbangshang village by Baishachang in Gulin, Sichuan — He Zizhen goes into labor.','Dusk. A few female Red Army soldiers help her into a thatched farmhouse. No bed, no door, wind howling through four walls. It is the first month of the lunar year — bitterly cold.','Comrades hastily spread a stretcher. Sun Yizi, head of the cadres\' rest company medical unit, and doctor Li Zhi deliver the baby. <span class="narrative-highlight">A cry pierces the silence — a daughter.</span>','He Zizhen pulls four silver dollars from her pocket, takes off her purple jacket, and wraps the child.','Dong Biwu hastily writes a note: <span class="narrative-highlight">"Fellow villagers: We are the army of the poor, on the march. A comrade has given birth. We entrust the child to your care. Please! Please!"</span> The baby is given to the landlord Zhang Erpo.','As the child is taken away, He Zizhen turns her face to the wall. Tears fall silently. <span class="narrative-highlight">This is the fourth time she has been separated from her own flesh and blood.</span>','The next day, the army moves out. No time for recovery. Gritting her teeth, she drags her exhausted body onto the stretcher and continues the march.']
+        }
+      },
+      // 画面10 - 叙事+决策
+      {
+        date:{zh:'1935年2月25日 · 娄山关',en:'February 25, 1935 · Loushan Pass'},
+        mapTarget:'loushan',
+        text:{
+          zh:['娄山关，黔北天险。海拔1440米，山势险要、隘口狭窄，是扼守遵义的天然咽喉要道。','<span class="narrative-highlight">黔军王家烈部依托山地地形驻守关口，凭险据守，阻拦红军前进路线。</span>','山间寒风凛冽，雾气笼罩雄关群山。','一名浑身尘土、气喘吁吁的侦察兵踉跄入内，声音发紧、碎急汇报：<span class="narrative-highlight">"指挥员！不好了！娄山关……地势太险了！两边全是悬崖峭壁！敌人，全占了山上高地！点金山制高点，死死攥在手里！机枪火力，全压在中间隘口！根本冲不上去啊！"</span>','跟随攻坚部队前行的前线指挥官步入帐内，面色凝重，语气急促：<span class="narrative-highlight">"指挥员，战士们连日奔袭，早就累到极点！敌军居高临下，占尽地利，怎么打，请指示！"</span>'],
+          en:['Loushan Pass — the natural fortress of northern Guizhou. At 1,440 meters, steep mountains and a narrow defile guard the gateway to Zunyi.','<span class="narrative-highlight">Wang Jialie\'s Guizhou forces hold the pass, using the terrain to block the Red Army\'s advance.</span>','Bitter wind and fog shroud the mountain pass.','A scout stumbles in, covered in dust, gasping: <span class="narrative-highlight">"Commander! It\'s terrible! Loushan Pass... the terrain is deadly! Cliffs on both sides! The enemy holds all the high ground! Dianjinshan peak is firmly in their hands! Machine gun fire pins down the central pass! We can\'t get through!"</span>','The frontline commander follows, face grave, voice urgent: <span class="narrative-highlight">"Commander, the men are exhausted from days of forced marches! The enemy has the high ground and every advantage. How do we fight? Awaiting orders!"</span>']
+        },
+        decision:{
+          title:{zh:'⚡ 娄山关：如何攻克？',en:'⚡ Loushan Pass: How to Capture?'},
+          choices:[
+            {label:'A',text:{zh:'集中兵力，正面强攻娄山关主路',en:'Concentrate forces, frontal assault on the main road'},
+              outcome:{icon:'⚠️',title:{zh:'伤亡惨重',en:'Heavy Casualties'},text:{zh:'红军猛攻关口，但敌军工事坚固，火力凶猛。激战一天，攻克娄山关，但伤亡惨重。',en:'The Red Army assaults fiercely, but enemy fortifications hold. After a day of fierce fighting, Loushan falls — at great cost.'},effects:{troops:-3500,supply:-20,morale:-30},score:5,mapNext:'loushan'}},
+            {label:'B',text:{zh:'正面牵制+左翼悬崖侧翼奇袭，主攻点金山',en:'Fix frontally + flank via cliffs, main effort on Dianjinshan'},
+              outcome:{icon:'🎯',title:{zh:'智取天险',en:'Taking the Fortress by Wit'},text:{zh:'红十三团正面牵制敌军，战士攀悬崖奇袭，于25日晚攻占点金山主峰。<span class="narrative-highlight">"敌人好像竹竿之下的鸭子，呼哈呼哈地滚下去了"</span>26日傍晚攻克娄山关。此战我军伤亡100人，缴获步枪2000余支、轻重机枪30余挺。',en:'The 13th Red Regiment fixes the enemy frontally while soldiers scale cliffs for a surprise flank attack, taking Dianjinshan peak on the evening of the 25th. <span class="narrative-highlight">"The enemy tumbled down like ducks under a bamboo pole."</span> By dusk on the 26th, Loushan Pass falls. Our casualties: 100. Captured: 2,000+ rifles, 30+ machine guns.'},effects:{troops:-100,supply:25,morale:30},score:25,mapNext:'zunyi'}},
+            {label:'C',text:{zh:'暂缓进攻，就地休整等待敌军松懈',en:'Delay assault, rest in place and wait for enemy to relax'},
+              outcome:{icon:'⚔️',title:{zh:'错失良机',en:'Missed Opportunity'},text:{zh:'暂缓进攻给了敌军增援的时间。黔军援兵赶到，娄山关更加难打。',en:'The delay gives the enemy time to reinforce. Guizhou reinforcements arrive, making Loushan even harder to take.'},effects:{troops:-1200,supply:-20,morale:-20},score:5,mapNext:'loushan'}},
+          ]
+        }
+      },
+      // 画面11 - 支线：曾希圣（纯叙事）
+      {
+        date:{zh:'1935年2月 · 遵义外围',en:'February 1935 · Outside Zunyi'},
+        mapTarget:'zunyi',
+        text:{
+          zh:['1935年2月，娄山关鏖战两日，关隘上下枪声震耳、硝烟弥漫，红军正面仰攻，伤亡不断、寸步难行。','你知道此时真正的凶险不在阵前，而在时间——若拖到敌军吴奇伟部赶到，三万红军将被压在狭窄山谷里，前后受敌、插翅难飞。','<span class="narrative-highlight">军委二局电台阵地上，曾希圣没拿枪，却比前线更煎熬：连续三天三夜没合眼，电台滋滋作响，电报纸条堆成小山，手指因长时间译电磨出血泡，眼窝深陷、声音嘶哑。</span>','最危急时，娄山关攻守拉锯、红军一度受阻，吴奇伟部正在逼近。曾希圣突然截获密电，指尖飞快破译，脸色骤变：<span class="narrative-highlight">吴奇伟司令部就在忠庄铺，距娄山关仅半日路程，随时可压上合围。</span>','曾希圣顾不上擦汗、来不及整理，攥着电文直接冲出帐篷，踩着泥泞往指挥部狂奔，声音因极度疲惫而发颤：','<span class="narrative-highlight">"快！吴奇伟主力快到了！忠庄铺是空的，打他指挥部！晚了就来不及了！"</span>','你看完情报，当即下令：正面死攻娄山关，同时派红一军团直扑忠庄铺。这一手彻底打乱敌军部署，娄山关当天拿下，吴奇伟部全线崩溃。<span class="narrative-highlight">曾希圣这封电报，救了全军。</span>'],
+          en:['February 1935. Two days of fierce fighting at Loushan Pass. Gunfire deafens, smoke blankets the heights. The Red Army attacks uphill — casualties mount, every inch costs blood.','You know the real danger isn\'t on the front lines — it\'s time. If Wu Qiwei\'s forces arrive, thirty thousand Red Army soldiers will be trapped in the narrow valley, attacked from both sides, with nowhere to fly.','<span class="narrative-highlight">At the Second Bureau radio station, Zeng Xisheng holds no rifle, yet suffers more than the front line: three days and nights without sleep, radios crackling, decoded messages piling like small mountains, fingers blistered from endless decryption, eyes sunken, voice hoarse.</span>','At the critical moment, as Loushan hangs in the balance, Zeng Xisheng intercepts a message. His fingers fly across the decryption. His face changes: <span class="narrative-highlight">Wu Qiwei\'s headquarters is at Zhongzhuangpu — barely half a day from Loushan. He could close the trap at any moment.</span>','Zeng Xisheng doesn\'t stop to wipe his sweat or organize the message. He grabs the decoded text and sprints out of the tent through the mud, voice trembling with exhaustion:','<span class="narrative-highlight">"Hurry! Wu Qiwei\'s main force is almost here! Zhongzhuangpu is undefended — strike his headquarters! If we\'re late, it\'s over!"</span>','You read the intelligence and order immediately: assault Loushan Pass head-on while sending the First Army Group straight for Zhongzhuangpu. This move shatters the enemy\'s deployment. Loushan falls that day. Wu Qiwei\'s forces collapse entirely. <span class="narrative-highlight">Zeng Xisheng\'s intercept saved the entire army.</span>']
+        }
+      },
+    ]
+  },
+  // ===== Chapter 3: 三渡赤水 · 声东击西 =====
+  {
+    title:{zh:'第三章 · 三渡赤水 · 声东击西',en:'Chapter 3 · Third Crossing · Feint East, Strike West'},
+    sceneImg:'crossing',
+    steps:[
+      // 画面12 - 叙事+决策
+      {
+        date:{zh:'1935年3月15日 · 遵义',en:'March 15, 1935 · Zunyi'},
+        mapTarget:'zunyi',
+        text:{
+          zh:['娄山关的硝烟还没散尽，早春的黔北山路泥泞湿滑，寒风裹挟着战火的余味。','遵义城外的乌江江面水汽弥漫，城内的百姓紧闭门户，街巷里还残留着国民党军队盘剥的痕迹。','<span class="narrative-highlight">娄山关大捷后，士气空前高涨，部队携带着缴获的武器弹药，决定乘胜回师遵义！</span>','黔军王家烈部与吴奇伟部据守遵义新城、老城，企图凭借城防工事阻挡红军，同时背靠乌江，试图与外围援军形成夹击之势。','侦察情报表明：敌军援军尚未抵达，城内防守力量空虚、人心不稳。你当即遵照军委指令，率军分两路突袭遵义，趁着夜色发起进攻，顺利攻破城池，随后一路追击至乌江。此战重创敌军主力，斩获颇丰。'],
+          en:['The smoke of Loushan has not yet cleared. Early spring in northern Guizhou — muddy mountain paths, cold wind carrying the taste of war.','Mist rises from the Wu River outside Zunyi. Inside the city, people keep their doors shut. Scars of KMT exploitation line the streets.','<span class="narrative-highlight">After the great victory at Loushan, morale soars. Carrying captured weapons and ammunition, the army marches back to take Zunyi!</span>','Wang Jialie\'s Guizhou forces and Wu Qiwei\'s troops hold the old and new city, relying on fortifications and the Wu River behind them, hoping for reinforcements to form a pincer.','Scout reports confirm: enemy reinforcements have not arrived. City defenses are weak, morale low. Following Military Commission orders, you split forces for a night assault. Zunyi falls. Pursuit continues to the Wu River. The enemy main force is shattered; captured materiel is substantial.']
+        },
+        decision:{
+          title:{zh:'⚡ 娄山关大捷后：下一步？',en:'⚡ After Loushan Victory: What\'s Next?'},
+          choices:[
+            {label:'A',text:{zh:'围攻鲁班场周浑元部',en:'Besiege Zhou Hunyuan at Lubanchang'},
+              outcome:{icon:'⚔️',title:{zh:'攻坚未果',en:'Costly Siege'},text:{zh:'红军围攻鲁班场，周浑元依托工事顽抗，双方陷入消耗战。伤亡渐增，战机延误。',en:'Red Army besieges Lubanchang. Zhou Hunyuan holds behind fortifications. A grinding battle ensues with mounting casualties.'},effects:{troops:-800,supply:-25,morale:-30},score:5,mapNext:'zunyi'}},
+            {label:'B',text:{zh:'三渡赤水，大张旗鼓西进！',en:'Third crossing — boldly march west!'},
+              outcome:{icon:'🎯',title:{zh:'声东击西',en:'Feint East, Strike West'},text:{zh:'3月16日，你率军从茅台镇三渡赤水。<span class="narrative-highlight">大摇大摆，故意暴露目标，摆出北渡长江的姿态。</span>蒋介石果然上当，急调所有部队向川南合围！',en:'March 16. You lead the army across the Chishui at Maotai. <span class="narrative-highlight">Boldly, even ostentatiously, you display your movements — pretending to cross the Yangtze north.</span> Chiang takes the bait! He orders all forces to converge on southern Sichuan!'},effects:{troops:-100,supply:-10,morale:40},score:20,mapNext:'maotai'}},
+            {label:'C',text:{zh:'固守遵义，控制黔北',en:'Hold Zunyi, control northern Guizhou'},
+              outcome:{icon:'❌',title:{zh:'被动挨打',en:'Pinned Down'},text:{zh:'固守遵义等于放弃了红军最大的优势——机动性。敌军四面合围，红军将陷入被动挨打的境地。',en:'Holding Zunyi abandons the Red Army\'s greatest advantage — mobility. Enemy forces close in from all sides.'},effects:{troops:-900,supply:-35,morale:-45},score:0,mapNext:'zunyi'}},
+          ]
+        }
+      },
+      // 画面13 - 叙事+决策
+      {
+        date:{zh:'1935年3月20日 · 川南',en:'March 20, 1935 · Southern Sichuan'},
+        mapTarget:'maotai',
+        text:{
+          zh:['茅台渡口的赤水河面上水流湍急，早春的川南河岸雾气弥漫，镇龙山一带的山路崎岖难行，远处的敌机不时盘旋侦察。','渡口边的茅台镇里，还残留着百姓的生活痕迹，红军在此架设浮桥，准备渡河。','<span class="narrative-highlight">遵义城下硝烟未散，蒋介石调集重兵卷土重来。</span>红军主动撤出遵义，计划通过三渡赤水制造北渡长江的假象，调动敌军主力西进。','蒋介石在贵阳行营坐镇指挥，认定红军要北渡长江，急令滇军孙渡部火速西进堵截，同时在川南布防，试图将红军围歼于川黔边境。','你军决定声东击西：<span class="narrative-highlight">在茅台渡口公开架设浮桥，部队大摇大摆渡河，还张贴标语、征集粮草，伪装成要北渡长江的样子；</span>同时派部队向古蔺行军，故意丢弃旧装备，误导敌军。','蒋介石果然中计，急令滇军西进堵截，贵阳兵力瞬间空虚。这场佯动成功把敌军主力引向川南，为后续直扑贵阳、跳出包围圈创造了关键战机。'],
+          en:['At the Maotai crossing, the Chishui runs swift. Early spring mist blankets the southern Sichuan banks. Mountain paths near Zhenlongshan are treacherous. Enemy reconnaissance planes circle overhead.','In Maotai town by the crossing, traces of civilian life remain. The Red Army builds pontoon bridges, preparing to cross.','<span class="narrative-highlight">Smoke still rises from the battles at Zunyi. Chiang masses fresh forces for a renewed offensive.</span> The Red Army voluntarily withdraws from Zunyi, planning a third crossing to create the illusion of crossing the Yangtze north — drawing the enemy main force westward.','Chiang directs from his Guiyang headquarters, convinced the Red Army will cross the Yangtze. He orders Sun Du\'s Yunnan forces to rush west and block the crossing, while fortifying southern Sichuan, aiming to annihilate the Red Army at the Sichuan-Guizhou border.','You decide on a feint: <span class="narrative-highlight">Openly build pontoon bridges at Maotai, cross ostentatiously, post slogans, requisition supplies — all pretending to head north across the Yangtze.</span> Meanwhile, a detachment marches toward Gulin, deliberately discarding old equipment to mislead the enemy.','Chiang takes the bait. He orders Yunnan forces west. Guiyang is suddenly stripped of troops. The feint successfully draws the enemy main force to southern Sichuan, creating the crucial opportunity to strike Guiyang and break the encirclement.']
+        },
+        decision:{
+          title:{zh:'⚡ 三渡赤水后的抉择',en:'⚡ Decision After the Third Crossing'},
+          choices:[
+            {label:'A',text:{zh:'顺势北渡长江',en:'Continue north to cross the Yangtze'},
+              outcome:{icon:'❌',title:{zh:'假戏真做',en:'Playing the Bluff Too Far'},text:{zh:'川军沿江防线早已布防完毕。红军强渡必遭顽抗，整个战略欺骗将前功尽弃。',en:'Sichuan river defenses are fully prepared. Forced crossing will face fierce resistance. The entire deception is wasted.'},effects:{troops:-950,supply:-40,morale:-50},score:0,mapNext:'gulin'}},
+            {label:'B',text:{zh:'秘密折返，四渡赤水！',en:'Secretly return — FOURTH crossing!'},
+              outcome:{icon:'🏆',title:{zh:'神来之笔！',en:'A Stroke of Genius!'},text:{zh:'3月21日夜，你下令秘密折返。<span class="narrative-highlight">红军从二郎滩、太平渡秘密东渡赤水——四渡赤水！</span>如幽灵般穿过敌军缝隙，跳出包围圈！蒋介石还在川南找你，你已到他身后！',en:'Night of March 21. You order a secret return. <span class="narrative-highlight">The Red Army secretly crosses back east at Erlangtan and Taipingdu — the FOURTH crossing!</span> Like phantoms through enemy gaps, you break free! Chiang searches in Sichuan while you\'re already behind him!'},effects:{troops:-50,supply:-15,morale:50},score:25,mapNext:'erlang'}},
+            {label:'C',text:{zh:'在川南打游击',en:'Conduct guerrilla warfare in southern Sichuan'},
+              outcome:{icon:'⚔️',title:{zh:'被动游击',en:'Passive Guerrilla'},text:{zh:'在敌军重重包围中打游击，等于以短击长。补给断绝，空间越来越小。',en:'Guerrilla warfare in the midst of enemy encirclement plays to weaknesses. Supplies run out; space shrinks.'},effects:{troops:-700,supply:-30,morale:-35},score:5,mapNext:'gulin'}},
+          ]
+        }
+      },
+    ]
+  },
+  // ===== Chapter 4: 四渡赤水 · 突围 =====
+  {
+    title:{zh:'终章 · 四渡赤水 · 突出重围',en:'Final Chapter · Fourth Crossing · Breaking Through'},
+    sceneImg:'bridge',
+    steps:[
+      // 画面14 - 叙事+决策
+      {
+        date:{zh:'1935年3月31日 · 乌江',en:'March 31, 1935 · Wu River'},
+        mapTarget:'erlang',
+        text:{
+          zh:['夜色如墨，赤水河水在脚下奔流，寒意透骨。你站在二郎滩渡口旁，春寒料峭，风中夹杂着河水的湿气。','一名作战参谋借着微弱的马灯光亮，摊开态势图，压低声音汇报：','<span class="narrative-highlight">"指挥！军委二局情报：蒋介石被佯动骗了，正把主力往遵义西北调。敌军主力被红九军团引向北方，赤水以南、乌江以北全是空当，这是突围的唯一机会！"</span>','话音未落，译电员攥着电文撞进来，声音发颤：','<span class="narrative-highlight">"指挥！曾希圣局长的假电报发出去了，以蒋介石名义让周浑元、吴奇伟继续北追！"</span>','后勤指挥员在你身后低声补了句，语气里全是急：','<span class="narrative-highlight">"指挥，战士们连轴作战，体力已到极限。再拖下去非战斗减员会涨，再不走就来不及了！"</span>'],
+          en:['Night as black as ink. The Chishui rushes at your feet, cold seeping into your bones. You stand by the Erlangtan crossing. Early spring chill, wind heavy with river damp.','A staff officer spreads a situation map under a dim horse lantern, reporting in a low voice:','<span class="narrative-highlight">"Commander! Second Bureau intelligence: Chiang fell for the feint — he\'s moving his main force northwest of Zunyi. The Ninth Army Group has drawn the enemy north. South of the Chishui and north of the Wu River — it\'s all wide open. This is the only chance to break out!"</span>','Before the words land, a telegraph operator crashes in clutching a message, voice trembling:','<span class="narrative-highlight">"Commander! Bureau Chief Zeng Xisheng\'s fake telegram has been sent — in Chiang\'s name, ordering Zhou Hunyuan and Wu Qiwei to continue pursuit north!"</span>','The logistics commander behind you adds quietly, urgency in every word:','<span class="narrative-highlight">"Commander, the men have been fighting non-stop. They\'re at their physical limit. If we delay, non-combat attrition will spike. If we don\'t move now, it\'ll be too late!"</span>']
+        },
+        decision:{
+          title:{zh:'⚡ 突围之后：如何破局？',en:'⚡ After Breaking Through: How to Press On?'},
+          choices:[
+            {label:'A',text:{zh:'乘胜追击，硬闯敌围',en:'Press the advantage, force through enemy lines'},
+              outcome:{icon:'⚔️',title:{zh:'强弩之末',en:'Fading Momentum'},text:{zh:'急进贵阳，但敌军已有准备。强攻坚城不下，侧翼反被敌军包抄，陷入苦战。',en:'Push hard toward Guiyang, but the enemy is ready. Strong defense stalls the assault; enemy flanking forces threaten to encircle.'},effects:{troops:-5000,supply:-30,morale:-40},score:0,mapNext:'guiyang'}},
+            {label:'B',text:{zh:'声北击南，跳出包围',en:'Feint north, strike south, break the encirclement'},
+              outcome:{icon:'🏆',title:{zh:'调虎离山！',en:'Luring the Tiger!'},text:{zh:'红军佯装伪渡，主力秘密折返东进，直扑贵阳，<span class="narrative-highlight">成功跳出敌军包围圈，摆脱围追堵截。</span>这次行动为红军争取到了战略空间，掌握了战场主动权，为南渡乌江、进军云南创造了有利条件。',en:'The Red Army feints a crossing while the main force secretly turns east, striking toward Guiyang. <span class="narrative-highlight">Successfully breaking the encirclement, shaking off all pursuit.</span> This operation gains strategic space, seizes battlefield initiative, and creates favorable conditions for crossing the Wu River south and advancing into Yunnan.'},effects:{troops:-50,supply:-15,morale:50},score:25,mapNext:'guiyang'}},
+            {label:'C',text:{zh:'原地待命，按兵不动',en:'Hold position, remain stationary'},
+              outcome:{icon:'⚔️',title:{zh:'坐失良机',en:'Letting Opportunity Slip'},text:{zh:'原地待命给了敌军调动的宝贵时间。追兵越来越近，包围圈再次缩小。',en:'Holding position gives the enemy precious time to maneuver. Pursuers close in; the encirclement shrinks again.'},effects:{troops:-3500,supply:-20,morale:-30},score:5,mapNext:'erlang'}},
+          ]
+        }
+      },
+      // 画面15 - 支线：红小鬼李光（纯叙事）
+      {
+        date:{zh:'1935年4月 · 行军途中',en:'April 1935 · On the March'},
+        mapTarget:'guiyang',
+        text:{
+          zh:['四渡赤水惊险突围，大军终于跳出四十万国军包围圈。','14岁的红小鬼李光，没有在正面战场浴血拼杀，却在整夜的绝密夜渡中默默坚守岗位，用稚嫩的双脚守住了全军的突围契机。','<span class="narrative-highlight">四渡夜渡全程静默行军，不许点火、不许出声。</span>身为通信员的他，草鞋早已磨穿，为避免脚步出声暴露队伍，全程光脚奔跑在摇晃的浮桥之上。','冰冷的赤水夜风刺骨，木板木刺扎破脚底，鲜血浸透桥面，他强忍剧痛往返传递口令，<span class="narrative-highlight">整夜未发一声、未出一错，稳稳衔接好全军渡河秩序。</span>','大部队成功突围、脱离险境后，没人留意这个满身伤痕的少年。','晚年李光回忆这段生死夜晚，坦言道：<span class="narrative-highlight">"那晚黑得吓人，河水冰冷，脚扎得钻心痛。但我心里清楚，我多稳一分，部队就安全一分，再疼也不能耽误突围。"</span>','无数如李光一般的红小鬼，隐于大军身后、守于危难之间。他们以少年之躯担起行军重任，默默筑牢全军突围的细微防线。'],
+          en:['The Fourth Crossing — a daring breakout. The army finally escapes the 400,000-strong KMT encirclement.','Fourteen-year-old Li Guang, a "Little Red Devil," didn\'t fight on the front lines. Instead, he held his post through the entire top-secret night crossing, his young feet safeguarding the army\'s breakout moment.','<span class="narrative-highlight">The night crossing was in total silence — no lights, no sound.</span> As a messenger, his straw sandals were long gone. To avoid making noise that might expose the column, he ran barefoot across the swaying pontoon bridge all night.','The freezing Chishui wind cut to the bone. Wooden splinters pierced his soles. Blood soaked the bridge planks. He endured the agony, shuttling back and forth with verbal orders — <span class="narrative-highlight">not a single sound, not a single mistake all night, steadily maintaining the army\'s crossing order.</span>','After the main force broke free, nobody noticed this scar-covered boy.','In his later years, Li Guang recalled that life-and-death night: <span class="narrative-highlight">"It was terrifyingly dark. The river was freezing, the splinters in my feet were agonizing. But I knew — every bit steadier I was, the safer the unit would be. No matter the pain, I couldn\'t delay the breakout."</span>','Countless Little Red Devils like Li Guang, hidden behind the main force, standing firm in the hour of danger. Their young shoulders bore the weight of the march, silently building the fine defenses that made the Four Crossings breakout possible.']
+        }
+      },
+      // 画面16 - 支线：贺子珍负伤（最终叙事）
+      {
+        date:{zh:'1935年4月 · 贵州某地',en:'April 1935 · Somewhere in Guizhou'},
+        mapTarget:'guiyang',
+        text:{
+          zh:['贵州盘县，五里排，干部休养连在山沟里休息。连日急行军，贺子珍产后不足两月，身体虚弱，靠在一棵大树下闭目养神。','天边传来嗡嗡声。哨兵大喊：<span class="narrative-highlight">"敌机——！隐蔽——！"</span>贺子珍迅速滚到路边土坎下卧倒。','就在此时，她的目光扫过田坝中央——一副担架孤零零地暴露在空地上。上面躺着红三军团第十二团政委钟赤兵，他在娄山关战斗中腿部中弹截肢，此刻动弹不得。','<span class="narrative-highlight">敌机正在掉头。贺子珍没有犹豫，猛地跃起冲向担架，拼尽全力将钟赤兵向隐蔽处拖去。</span>','就在即将靠近土坎的瞬间，炸弹在她身旁炸开。硝烟散去，战友们看见贺子珍趴在担架上，军装后背被撕成碎片，鲜血浸透了土地。<span class="narrative-highlight">钟赤兵毫发无损。17块弹片嵌入了贺子珍的头部、背部、四肢。</span>','军医没有麻药，用镊子一块一块将浅表的弹片硬生生夹出。她死死咬着毛巾，没有发出一声呻吟。','苏醒后，她第一句话问：<span class="narrative-highlight">"钟赤兵怎么样了？"</span>得知伤员没事，她才松了口气："不要告诉主席，他在前线很忙。"','她从不是冲锋陷阵的战士，却在敌人俯冲的那一刻，用自己的身体为战友挡住了死亡。四渡赤水的胜利，不只是那些载入史册的大仗，还有这些无声的扑倒、沉默的托举——和一个个从未被母亲抱起的孩子。'],
+          en:['Panxian, Guizhou, Wulipai. The cadres\' rest company rests in a mountain hollow. After days of forced marches, He Zizhen — less than two months postpartum — leans against a tree, eyes closed.','A buzzing from the sky. The sentry shouts: <span class="narrative-highlight">"Enemy planes! Take cover!"</span> He Zizhen quickly rolls behind a roadside embankment.','Then she sees it — a stretcher lying exposed in the open field. On it is Zhong Chibing, political commissar of the 12th Regiment, Third Army Group. His leg was amputated after being wounded at Loushan Pass. He cannot move.','<span class="narrative-highlight">The planes are turning. He Zizhen doesn\'t hesitate — she leaps up, sprints to the stretcher, and drags Zhong Chibing toward cover with all her strength.</span>','Just as they near the embankment, a bomb explodes beside her. When the smoke clears, comrades see He Zizhen collapsed on the stretcher, her uniform back shredded, blood soaking the earth. <span class="narrative-highlight">Zhong Chibing is unharmed. Seventeen shrapnel fragments are embedded in He Zizhen\'s head, back, and limbs.</span>','The military doctor has no anesthetic. Piece by piece, he pulls out the shallow fragments with forceps. She bites down on a towel. Not a single groan.','When she regains consciousness, her first words: <span class="narrative-highlight">"How is Zhong Chibing?"</span> Told he is fine, she sighs with relief: "Don\'t tell the Chairman. He\'s busy at the front."','She was never a charging soldier. Yet in the moment the enemy dove, she used her body to shield a comrade from death. The victory of the Four Crossings is not only the battles recorded in history — but also these silent falls, these wordless acts of lifting — and the children never held by their mothers.']
+        }
+      },
+    ]
+  },
+];
+
+// ===== GAME LOGIC =====
+function startGame(){
+  document.getElementById('start-screen').classList.add('fade-out');
+  setTimeout(()=>{
+    document.getElementById('start-screen').style.display='none';
+    document.getElementById('game-container').classList.add('active');
+    if(!audioCtx)initAudio();
+    if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices()}
+    initMapOverlays();initRouteLines();showStep();
+  },800);
+}
+
+function showStep(){
+  stopNarr();
+  const ch=chapters[state.chapter];if(!ch){endGame();return}
+  const step=ch.steps[state.step];if(!step){nextChapter();return}
+
+  document.getElementById('chapterTitle').textContent=T(ch.title.zh,ch.title.en);
+  updateRes();
+  updateBackBtn();
+
+  if(step.mapTarget){advanceMap(step.mapTarget);playSFX('march')}
+
+  const sImg=step.sceneImg||ch.sceneImg;
+  const sceneImgEl=document.getElementById('sceneImg');if(sceneImgEl)sceneImgEl.src=sceneImages[sImg]||sceneImages.crossing;
+  mapState.sceneVisible=false;const sp2=document.getElementById('scenePanel');if(sp2)sp2.classList.remove('show');
+
+  const nc=document.getElementById('narrativeContent');
+  const texts=T(step.text.zh,step.text.en);
+  let html=`<div class="narrative-date">${T(step.date.zh,step.date.en)}</div>`;
+  texts.forEach((p,i)=>{html+=`<div class="narrative-text" id="nt${i}">${p}</div>`});
+  nc.innerHTML=html;
+  setTimeout(()=>{document.querySelectorAll('.narrative-text').forEach((el,i)=>{setTimeout(()=>el.classList.add('visible'),i*200)})},100);
+  nc.scrollTop=0;
+
+  const dp=document.getElementById('decisionPanel');
+  // 判断是否为纯叙事画面（无decision字段）或决策画面
+  if(step.decision){
+    // 有决策的画面：显示决策选项
+    let dh=`<div class="decision-title">${T(step.decision.title.zh,step.decision.title.en)}</div><div class="choices">`;
+    step.decision.choices.forEach((c,i)=>{dh+=`<button class="choice-btn" onclick="makeChoice(${i})"><span class="choice-label">${c.label}</span>${T(c.text.zh,c.text.en)}</button>`});
+    dh+='</div>';
+    dp.innerHTML=dh;
+  }else{
+    // 纯叙事画面：显示"继续"按钮
+    dp.innerHTML=`<button class="choice-btn" style="margin:16px auto 0;display:block;min-width:140px" onclick="advanceStep()"><span class="choice-label">▶</span>${T('继续','Continue')}</button>`;
+  }
+
+  if(state.step===0)playSFX('chapter');
+
+  setTimeout(()=>{const elems=texts.map((_,i)=>document.getElementById(`nt${i}`));speakNarrative(texts,elems)},1000);
+}
+
+// 纯叙事画面点击"继续"后的处理
+function advanceStep(){
+  stopNarr();
+  // 保存纯叙事画面的快照，以便回溯
+  saveSnapshot();
+  updateBackBtn();
+  
+  state.step++;
+  const ch=chapters[state.chapter];
+  if(state.step>=ch.steps.length){
+    nextChapter();
+  }else{
+    showStep();
+  }
+}
+
+function makeChoice(idx){
+  const ch=chapters[state.chapter];const step=ch.steps[state.step];
+  const choice=step.decision.choices[idx];const out=choice.outcome;
+  stopNarr();playSFX('choice');
+
+  // Save state before applying this decision (for undo)
+  saveSnapshot();
+  updateBackBtn();
+
+  state.decisions.push({chapter:state.chapter,step:state.step,choice:idx,score:out.score});
+  if(out.effects.troops)state.troops=Math.max(5000,state.troops+out.effects.troops);
+  if(out.effects.supply)state.supply=Math.max(10,Math.min(100,state.supply+out.effects.supply));
+  if(out.effects.morale)state.morale=Math.max(10,Math.min(100,state.morale+out.effects.morale));
+  state.score+=out.score;
+  updateRes();
+
+  // 地图移动由每个step的mapTarget控制，不再由choice的mapNext驱动
+
+  if(out.score>=20)setTimeout(()=>playSFX('victory'),300);
+  else if(out.score<=5)setTimeout(()=>playSFX('defeat'),300);
+
+  document.getElementById('outcomeIcon').textContent=out.icon;
+  document.getElementById('outcomeTitle').textContent=T(out.title.zh,out.title.en);
+  document.getElementById('outcomeText').innerHTML=T(out.text.zh,out.text.en);
+
+  let eh='';
+  if(out.effects.troops)eh+=`<span class="outcome-effect">⚔️ ${T('兵力','Troops')} ${out.effects.troops>0?'+':''}${out.effects.troops}</span>`;
+  if(out.effects.supply)eh+=`<span class="outcome-effect">📦 ${T('补给','Supply')} ${out.effects.supply>0?'+':''}${out.effects.supply}</span>`;
+  if(out.effects.morale)eh+=`<span class="outcome-effect">🔥 ${T('士气','Morale')} ${out.effects.morale>0?'+':''}${out.effects.morale}</span>`;
+  document.getElementById('outcomeEffects').innerHTML=eh;
+  document.getElementById('outcomeOverlay').classList.add('show');
+
+  setTimeout(()=>speakEmotional(T(out.title.zh,out.title.en)+'。'+T(out.text.zh,out.text.en).replace(/<[^>]*>/g,'')),600);
+}
+
+function closeOutcome(){
+  stopNarr();document.getElementById('outcomeOverlay').classList.remove('show');
+
+  state.step++;
+  const ch=chapters[state.chapter];
+  if(state.step>=ch.steps.length)nextChapter();else showStep();
+}
+
+function nextChapter(){state.chapter++;state.step=0;if(state.chapter>=chapters.length)endGame();else showStep()}
+
+function updateRes(){
+  document.getElementById('troopVal').textContent=state.troops.toLocaleString();
+  document.getElementById('supplyVal').textContent=state.supply;
+  document.getElementById('moraleVal').textContent=state.morale;
+}
+
+function endGame(){
+  stopNarr();if(bgmAudio)bgmAudio.pause();
+  document.getElementById('game-container').classList.remove('active');
+
+  playSFX('complete');
+
+  const max=160;const pct=state.score/max;
+  let rank,title,summary;
+  if(pct>=0.8){rank={zh:'🏆 战神级指挥官',en:'🏆 Legendary Commander'};title={zh:'用兵如神',en:'Master of War'};summary={zh:'你完美复刻了四渡赤水的战略精髓。蒋介石四十万大军在你面前如同棋子。毛泽东大概会说："此人与我英雄所见略同。"',en:'You perfectly recreated the Four Crossings. Four hundred thousand troops were pieces on your board. Mao might say: "This one sees as I do."'}}
+  else if(pct>=0.6){rank={zh:'⭐ 优秀指挥官',en:'⭐ Distinguished Commander'};title={zh:'将才之风',en:'A General\'s Mettle'};summary={zh:'你展现了出色的军事才能，红军成功突围，只是代价比历史稍大。',en:'Excellent military talent. The Red Army breaks free, though at slightly greater cost.'}}
+  else if(pct>=0.4){rank={zh:'🎖️ 合格指挥官',en:'🎖️ Competent Commander'};title={zh:'中规中矩',en:'Adequate Performance'};summary={zh:'你完成了突围但走了弯路。四渡赤水的精髓在于"动"——让敌人跟着你跑。',en:'You broke free but took detours. The essence is movement — make the enemy chase you.'}}
+  else if(pct>=0.2){rank={zh:'😰 菜鸟指挥官',en:'😰 Green Commander'};title={zh:'险象环生',en:'Perilous Journey'};summary={zh:'你把红军带进一个又一个险境。建议重新学习历史再来一次。',en:'You led the army into danger after danger. Study the history and try again.'}}
+  else{rank={zh:'💀 灾难级指挥官',en:'💀 Disastrous Commander'};title={zh:'兵败如山',en:'Total Defeat'};summary={zh:'你几乎犯了所有不该犯的错误，红军损失惨重。',en:'You made nearly every mistake. Catastrophic losses under your command.'}}
+
+  document.getElementById('endTitle').textContent=T(title.zh,title.en);
+  document.getElementById('endRank').textContent=T(rank.zh,rank.en);
+  document.getElementById('endScore').textContent=`${T('得分','Score')}: ${state.score}/${max}  |  ${T('兵力','Troops')}: ${state.troops.toLocaleString()}  |  ${T('士气','Morale')}: ${state.morale}`;
+  document.getElementById('endSummary').textContent=T(summary.zh,summary.en);
+  document.getElementById('end-screen').classList.add('active');
+  setTimeout(()=>{if(narrOn)speakEmotional(T(title.zh,title.en)+'。'+T(summary.zh,summary.en))},1200);
+}
+
+window.addEventListener('resize',()=>{});
+</script>
+</body>
+</html>
